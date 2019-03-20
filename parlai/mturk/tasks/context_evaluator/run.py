@@ -46,8 +46,9 @@ def main():
     task_opt['datatype'] = 'test.num_passages=1'  # dev.num_passages=20
     evaluation_data_filename = 'debate_logs.d=A_B.json'  # debate_logs.d=B.json
 
-    with open(os.path.join(task_opt['datapath'], dataset_folder_name, task_opt['datatype'], evaluation_data_filename)
-              ) as json_file:
+    # with open(os.path.join(task_opt['datapath'], dataset_folder_name, task_opt['datatype'], evaluation_data_filename)
+    #           ) as json_file:
+    with open(evaluation_data_filename) as json_file:
         evaluation_data = json.load(json_file)
 
     # Select an agent_id that worker agents will be assigned in their world
