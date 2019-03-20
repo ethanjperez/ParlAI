@@ -37,7 +37,7 @@ task_config['task_description'] = \
 In this task, you will be evaluating which answer the context supports.<br><br>
 Example:<br><br>
 ------------------- Task Begin ------------------- <br><br>
-<b>Evidence Evaluator</b>:<br>
+<b>Evidence</b>:<br>
 "Wearing Heelys for a long time could stop young people from developing their legs."<br><br>
 
 What does the doctor think of Heelys?<br>
@@ -46,10 +46,10 @@ B: They are too fast to go.<br>
 C: They are bad for kids' health.<br>
 D: They are good for training.<br><br>
 
-Given the context, which answer is most likely to be correct? (A, B, C, or D)
+Which answer does the evidence support? (A, B, C, or D)
 <br><br>
-<b>Worker</b>:<br>
-A<br><br>
+<b>Evaluator</b>:<br>
+C<br><br>
 ------------------- Task Done ------------------- <br><br>
 If you are ready, please click "Accept HIT" to start this task.
 '''

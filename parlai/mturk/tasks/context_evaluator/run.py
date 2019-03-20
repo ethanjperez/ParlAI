@@ -4,18 +4,25 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 from parlai.core.params import ParlaiParser
-from parlai.mturk.tasks.evidence_evaluator.worlds import \
-    EvidenceEvaluationOnboardWorld, EvidenceEvaluationWorld
+from parlai.mturk.tasks.context_evaluator.worlds import \
+    ContextEvaluationOnboardWorld, ContextEvaluationWorld
 from parlai.mturk.core.mturk_manager import MTurkManager
-from parlai.mturk.tasks.evidence_evaluator.task_config import task_config
+from parlai.mturk.tasks.context_evaluator.task_config import task_config
 import os
 import importlib
+import json
+
+MASTER_QUALIF = {
+    'QualificationTypeId': '2F1QJWKUDD8XADTFD2Q0G6UTO95ALH',
+    'Comparator': 'Exists',
+    'RequiredToPreview': True
+}
 
 
 def main():
-    '''Handles setting up and running a ParlAI-MTurk task by instantiating
-    an MTurk manager and configuring it for the evidence_evaluator task
-    '''
+    """Handles setting up and running a ParlAI-MTurk task by instantiating
+    an MTurk manager and configuring it for the context_evaluator task
+    """
     # Get relevant arguments
     argparser = ParlaiParser(False, False)
     argparser.add_parlai_data_path()
@@ -28,17 +35,23 @@ def main():
     # append the contents of task_config.py to the configuration
     opt.update(task_config)
 
-    # Initialize a SQuAD teacher agent, which we will get context from
+    # Initialize a dataset agent, which we will get context from
     module_name = 'parlai.tasks.race.agents'
     class_name = 'IndexTeacher'
     my_module = importlib.import_module(module_name)
     task_class = getattr(my_module, class_name)
     task_opt = opt.copy()
-    task_opt['datatype'] = 'test.num_passages=10'
     task_opt['datapath'] = opt['datapath']
+    dataset_folder_name = 'RACE'
+    task_opt['datatype'] = 'test.num_passages=1'  # dev.num_passages=20
+    evaluation_data_filename = 'debate_logs.d=A_B.json'  # debate_logs.d=B.json
+
+    with open(os.path.join(task_opt['datapath'], dataset_folder_name, task_opt['datatype'], evaluation_data_filename)
+              ) as json_file:
+        evaluation_data = json.load(json_file)
 
     # Select an agent_id that worker agents will be assigned in their world
-    mturk_agent_id = 'Worker'
+    mturk_agent_id = 'Evaluator'
 
     # Instantiate an MTurkManager with the given options and a maximum number
     # of agents per world of 1 (based on the length of mturk_agent_ids)
@@ -53,15 +66,15 @@ def main():
     # accepted your task and must be completed before they are put in the
     # queue for a task world.
     def run_onboard(worker):
-        world = EvidenceEvaluationOnboardWorld(opt=opt, mturk_agent=worker)
+        world = ContextEvaluationOnboardWorld(opt=opt, mturk_agent=worker)
         while not world.episode_done():
             world.parley()
         world.shutdown()
         return world.prep_save_data([worker])
 
     # If we want to use the above onboard function, we can replace the below
-    # with set_onboard_function(onboard_function=run_onboard)
-    mturk_manager.set_onboard_function(onboard_function=None)
+    # with set_onboard_function(onboard_function=run_onboard) (onboard_function=None to skip)
+    mturk_manager.set_onboard_function(onboard_function=run_onboard)
 
     try:
         # Initialize run information
@@ -98,9 +111,8 @@ def main():
         def run_conversation(mturk_manager, opt, workers):
             # create a task agent to ask the questions
             task = task_class(task_opt)
-            evaluation_data = {}  # TODO: Read evaluation_data from file
             # Create the task world
-            world = EvidenceEvaluationWorld(
+            world = ContextEvaluationWorld(
                 opt=opt,
                 task=task,
                 mturk_agent=workers[0],

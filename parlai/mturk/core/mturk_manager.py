@@ -928,8 +928,9 @@ class MTurkManager():
                 ''.format(self.hit_mult, fin_word),
                 should_print=True,
             )
-        input('Please press Enter to continue... ')
-        shared_utils.print_and_log(logging.NOTSET, '', True)
+        if not self.is_sandbox:
+            input('Please press Enter to continue... ')
+            shared_utils.print_and_log(logging.NOTSET, '', True)
 
         if self.opt['local'] is True:
             shared_utils.print_and_log(
