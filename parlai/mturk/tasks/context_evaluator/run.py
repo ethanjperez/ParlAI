@@ -43,13 +43,13 @@ def main():
     task_opt = opt.copy()
     task_opt['datapath'] = opt['datapath']
     dataset_folder_name = 'RACE'
-    task_opt['datatype'] = 'test.num_passages=1'  # dev.num_passages=20
-    evaluation_data_filename = 'debate_logs.d=A_B.json'  # debate_logs.d=B.json
+    task_opt['datatype'] = 'dev.num_passages=13'
 
-    # with open(os.path.join(task_opt['datapath'], dataset_folder_name, task_opt['datatype'], evaluation_data_filename)
-    #           ) as json_file:
-    with open(evaluation_data_filename) as json_file:
-        evaluation_data = json.load(json_file)
+    evaluation_data = None
+    if task_opt['evaluation_data_filename'] is not None:
+        with open(os.path.join(task_opt['datapath'], dataset_folder_name, task_opt['datatype'],
+                               task_opt['evaluation_data_filename'])) as json_file:
+            evaluation_data = json.load(json_file)
 
     # Select an agent_id that worker agents will be assigned in their world
     mturk_agent_id = 'Evaluator'
@@ -75,7 +75,7 @@ def main():
 
     # If we want to use the above onboard function, we can replace the below
     # with set_onboard_function(onboard_function=run_onboard) (onboard_function=None to skip)
-    mturk_manager.set_onboard_function(onboard_function=run_onboard)
+    mturk_manager.set_onboard_function(onboard_function=None)
 
     try:
         # Initialize run information

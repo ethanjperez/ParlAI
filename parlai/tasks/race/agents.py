@@ -32,7 +32,7 @@ class IndexTeacher(FixedDialogTeacher):
             'RACE',
             self.datatype
         )
-        self.data = self._setup_data(datapath)
+        self.data = self._setup_data(datapath, opt['split_no'], opt['num_splits'])
 
         self.id = 'race'
         self.reset()
@@ -46,11 +46,7 @@ class IndexTeacher(FixedDialogTeacher):
     def get(self, episode_idx, entry_idx=None):
         return self.examples[episode_idx]
 
-    # def setup_data(self):
-    #     for example in self.examples:
-    #         yield example
-
-    def _setup_data(self, file_path):
+    def _setup_data(self, file_path, split_no=0, num_splits=1):
         self.examples = []
         for level in ['high', 'middle']:
             # Get all articles
@@ -68,8 +64,6 @@ class IndexTeacher(FixedDialogTeacher):
                 passage_text = art_data["article"]
 
                 # Iterate through questions
-                # NB: Can reduce memory by not repeating passages. Add art_data to a list,
-                # storing indices into self.examples and question indices in self.examples
                 for q in range(len(art_data["questions"])):
                     question_text = art_data["questions"][q].strip().replace("\n", "")
                     options_text = art_data["options"][q]
@@ -89,6 +83,7 @@ class IndexTeacher(FixedDialogTeacher):
                         'question': question_text,
                         'options': options_text
                     })
+        self.examples = self.examples[split_no::num_splits]
 
     @staticmethod
     def _filepath_to_id(filepath: str, q_no: int) -> str:
