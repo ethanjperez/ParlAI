@@ -8,6 +8,7 @@ from parlai.mturk.core.worlds import MTurkOnboardWorld, MTurkTaskWorld
 
 import math
 from pprint import pprint
+import random
 
 
 class ContextEvaluationOnboardWorld(MTurkOnboardWorld):
@@ -52,6 +53,12 @@ class ContextEvaluationWorld(MTurkTaskWorld):
         self.max_collected = len(self.task.examples)
         self.collector_agent_id = 'Context' if self.evaluation_data else 'Question'
 
+        random.seed(0)
+        debate_modes = list(evaluation_data.keys())
+        debate_modes.sort()
+        self.example_no_to_debate_mode = [debate_modes[random.randint(0, len(debate_modes) - 1) - opt['option_split_no']]]
+        print(self.example_no_to_debate_mode)
+
         # Initial instructions
         ad = {'id': 'System'}
         ad['text'] = 'Welcome onboard! We would like to have you answer ' + str(self.max_collected) + \
@@ -73,7 +80,7 @@ class ContextEvaluationWorld(MTurkTaskWorld):
         self.mturk_agent.act()
 
     def parley(self):
-        ad = {'episode_done': False, 'id': self.collector_agent_id}
+        ad = {'episode_done': False, 'id': self.collector_agent_id + ' ' + str(self.num_collected + 1)}
 
         # Get context from dataset teacher agent
         qa = self.task.act()

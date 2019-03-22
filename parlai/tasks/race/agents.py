@@ -32,7 +32,7 @@ class IndexTeacher(FixedDialogTeacher):
             'RACE',
             self.datatype
         )
-        self.data = self._setup_data(datapath, opt['split_no'], opt['num_splits'])
+        self.data = self._setup_data(datapath, opt['question_split_no'], opt['question_splits'])
 
         self.id = 'race'
         self.reset()

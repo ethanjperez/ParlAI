@@ -42,14 +42,14 @@ def main():
     task_class = getattr(my_module, class_name)
     task_opt = opt.copy()
     task_opt['datapath'] = opt['datapath']
-    dataset_folder_name = 'RACE'
     task_opt['datatype'] = 'dev.num_passages=13'
 
     evaluation_data = None
-    if task_opt['evaluation_data_filename'] is not None:
-        with open(os.path.join(task_opt['datapath'], dataset_folder_name, task_opt['datatype'],
-                               task_opt['evaluation_data_filename'])) as json_file:
-            evaluation_data = json.load(json_file)
+    if task_opt['evaluation_data_dir'] is not None:
+        evaluation_data = {}
+        for filename in os.listdir(task_opt['evaluation_data_dir']):
+            with open(os.path.join(task_opt['evaluation_data_dir'], filename)) as json_file:
+                evaluation_data[filename[:-5]] = json.load(json_file)
 
     # Select an agent_id that worker agents will be assigned in their world
     mturk_agent_id = 'Evaluator'
