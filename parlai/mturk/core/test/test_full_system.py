@@ -27,7 +27,7 @@ MTurkManagerFile.parent_dir = os.path.dirname(os.path.abspath(__file__))
 MTurkManagerFile.input = mock.MagicMock()
 
 # Lets ignore the logging part
-MTurkManagerFile.shared_utils.print_and_log = mock.MagicMock()
+parlai.mturk.core.shared_utils.print_and_log = mock.MagicMock()
 
 TEST_WORKER_ID_1 = 'TEST_WORKER_ID_1'
 TEST_WORKER_ID_2 = 'TEST_WORKER_ID_2'
@@ -329,8 +329,8 @@ class TestMTurkManagerWorkflows(unittest.TestCase):
 
     def setUp(self):
         # Mock functions that hit external APIs and such
-        self.server_utils = MTurkManagerFile.server_utils
-        self.mturk_utils = MTurkManagerFile.mturk_utils
+        self.server_utils = parlai.mturk.core.server_utils
+        self.mturk_utils = parlai.mturk.core.mturk_utils
         self.server_utils.setup_server = \
             mock.MagicMock(return_value='https://127.0.0.1')
         self.server_utils.setup_legacy_server = \
