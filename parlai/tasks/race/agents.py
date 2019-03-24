@@ -54,6 +54,7 @@ class IndexTeacher(FixedDialogTeacher):
             if not os.path.exists(file_level_path):
                 continue
             articles = os.listdir(file_level_path)
+            articles.sort()
             for article in articles:
                 art_file = os.path.join(file_level_path, article)
                 with open(art_file, 'rb') as f:
