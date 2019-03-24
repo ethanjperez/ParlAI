@@ -64,6 +64,4 @@ Click "Accept HIT" to start this task.
 """,
     'evaluation_data_dir': '../allennlp/eval/tfidf.o/dev',  # , 'debate_logs.d=A_B.json', 'debate_logs.d=B.json', etc.
     'question_splits': 5,  # max num Q's per passage
-    'question_split_no': 0,  # 0-question_splits
-    'option_split_no': 0  # 0-3
 }
