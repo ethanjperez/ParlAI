@@ -235,19 +235,20 @@ class ContextEvaluationWorld(MTurkTaskWorld):
             self.mturk_agent.reject_work('Accuracy')
         else:
             self.mturk_agent.approve_work()
+            bonus_amount = round(.25 * self.reward, 2)
             if self.accuracy['question'] >= .35:
                 # Bonus if you're decently better than random, even with just question+options -only
-                self.mturk_agent.pay_bonus(.25 * self.reward, 'Great question-only accuracy!')
+                self.mturk_agent.pay_bonus(bonus_amount, 'Great question-only accuracy!')
                 print(self.mturk_agent.worker_id,
                       '| PAY_BONUS:', "self.accuracy['question'] =", self.accuracy['question'])
 
             if self.accuracy['context_question'] >= .7:
-                self.mturk_agent.pay_bonus(.25 * self.reward, 'Great question+context accuracy!')
+                self.mturk_agent.pay_bonus(bonus_amount, 'Great question+context accuracy!')
                 print(self.mturk_agent.worker_id,
                       '| PAY_BONUS:', "self.accuracy['context_question'] =", self.accuracy['context_question'])
 
             if (self.num_changed_responses is not None) and (freq_changed_responses >= .5):
-                self.mturk_agent.pay_bonus(.25 * self.reward, 'Great job!')
+                self.mturk_agent.pay_bonus(bonus_amount, 'Great job!')
                 print(self.mturk_agent.worker_id,
                       '| PAY_BONUS:', "freq_changed_responses =", freq_changed_responses)
 
