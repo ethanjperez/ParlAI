@@ -52,6 +52,17 @@ def main():
             with open(os.path.join(task_opt['evaluation_data_dir'], filename)) as json_file:
                 evaluation_data[filename[:-5]] = json.load(json_file)
 
+    # The values in these maps should always be non-negative
+    global active_workers_per_incomplete_hit_by_split, active_workers_by_split, incomplete_hits_by_split
+    active_workers_per_incomplete_hit_by_split, active_workers_by_split, incomplete_hits_by_split = {}, {}, {}
+    for q_spl in range(task_config['question_splits']):
+        for o_spl in range(task_config['num_options']):
+            active_workers_by_split[(q_spl, o_spl)] = 0
+            incomplete_hits_by_split[(q_spl, o_spl)] = opt['num_conversations'] / (
+                    task_config['question_splits'] * task_config['num_options'])
+            active_workers_per_incomplete_hit_by_split[(q_spl, o_spl)] = (
+                    active_workers_by_split[(q_spl, o_spl)] / incomplete_hits_by_split[(q_spl, o_spl)])
+
     # Select an agent_id that worker agents will be assigned in their world
     mturk_agent_id = 'Evaluator'
 
@@ -112,6 +123,19 @@ def main():
 
         def run_conversation(mturk_manager, opt, workers):
             # create a task agent to ask the questions
+            q_spl, o_spl = min(active_workers_per_incomplete_hit_by_split,
+                               key=active_workers_per_incomplete_hit_by_split.get)
+            active_workers_by_split[(q_spl, o_spl)] += 1
+            active_workers_per_incomplete_hit_by_split[(q_spl, o_spl)] = (
+                    active_workers_by_split[(q_spl, o_spl)] / incomplete_hits_by_split[(q_spl, o_spl)])
+            task_opt['question_split_no'] = q_spl
+            task_opt['option_split_no'] = o_spl
+            opt['question_split_no'] = q_spl
+            opt['option_split_no'] = o_spl
+            print('active_workers_by_split:', active_workers_by_split)
+            print('incomplete_hits_by_split:', incomplete_hits_by_split)
+            print('active_workers_per_incomplete_hit_by_split:', active_workers_per_incomplete_hit_by_split)
+
             task = task_class(task_opt)
             # Create the task world
             world = ContextEvaluationWorld(
@@ -127,6 +151,13 @@ def main():
             # shutdown and review the work
             world.shutdown()
             world.review_work()
+
+            active_workers_by_split[(q_spl, o_spl)] = max(0, active_workers_by_split[(q_spl, o_spl)] - 1)
+            if not world.reject_work:
+                incomplete_hits_by_split[(q_spl, o_spl)] = max(0, incomplete_hits_by_split[(q_spl, o_spl)] - 1)
+            active_workers_per_incomplete_hit_by_split[(q_spl, o_spl)] = (
+                    float('inf') if incomplete_hits_by_split[(q_spl, o_spl)] <= 0 else
+                    active_workers_by_split[(q_spl, o_spl)] / incomplete_hits_by_split[(q_spl, o_spl)])
 
             # Return the contents for saving
             return world.prep_save_data(workers)

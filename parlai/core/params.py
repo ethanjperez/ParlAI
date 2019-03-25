@@ -275,12 +275,12 @@ class ParlaiParser(argparse.ArgumentParser):
 
     def add_context_evaluation_args(self):
         evaluation = self.add_argument_group('Context Evaluation')
-        evaluation.add_argument(
-            '--question-split-no', default=0, type=int,
-            help='Which question split number to use.')
-        evaluation.add_argument(
-            '--option-split-no', default=0, type=int,
-            help='Which option split number to use.')
+        # evaluation.add_argument(
+        #     '--question-split-no', default=0, type=int,
+        #     help='Which question split number to use.')
+        # evaluation.add_argument(
+        #     '--option-split-no', default=0, type=int,
+        #     help='Which option split number to use.')
 
     def add_messenger_args(self):
         messenger = self.add_argument_group('Facebook Messenger')

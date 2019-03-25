@@ -9,36 +9,18 @@ task_config = {
     'hit_title': 'Guess the answer!',
     'hit_description': 'Guess the answer given some context.',
     'hit_keywords': 'reading,question,answer',
-    #     'task_description': """
-    # In this task, you will guess the answer to a question, given some related context.<br><br>
-    # Sometimes, the context may directly answer the question.
-    # Other times, it may be unhelpful or vaguely suggest a few answers.
-    # In this case, just give your best guess.<br><br>
-    # Example:<br><br>
-    # ------------------- Task Begin ------------------- <br><br>
-    # <b>Context</b>:<br>
-    # "Wearing Heelys for a long time could stop young people from developing their legs."<br><br>
-    #
-    # What does the doctor think of Heelys?<br>
-    # A: They are too expensive to buy.<br>
-    # B: They are too fast to go.<br>
-    # C: They are bad for kids' health.<br>
-    # D: They are good for training.<br><br>
-    #
-    # Which answer does the evidence support? (A, B, C, or D)
-    # <br><br>
-    # <b>Evaluator</b>:<br>
-    # C<br><br>
-    # ------------------- Task Done ------------------- <br><br>
-    # If you are ready, please click "Accept HIT" to start this task.
-    # """,
     'task_description': """
-In this task, you will guess the answer to a question.<br><br>
-First, you must guess the answer the question without any of the necessary context to answer it.
-Second, you will be given the same question some context to answer the question. This additional context may or may not change your answer, depending on how useful or relevant it is to the question.
-Often the answer will be inherently difficult to determine (especially when no context is provided). In these cases, just give your best guess.<br><br>
-Example:<br><br>
-------------------- Task Begin ------------------- <br><br>
+Guess a question's answer in 2 settings:<br>
+1. Without any of the necessary context to answer the question.<br>
+2. With some context sentence(s) that may or may not cause you to change your answer.<br><br>
+
+Often the answer will be tough to determine (especially without any context). Here, just give your best guess.<br><br>
+
+<b>Estimated Time</b> (all questions in HIT): 11 minutes.<br>
+<b>Accuracy Bonus</b>: Up to $1.5/HIT<br>
+<b>Payout</b>: Immediate<br><br>
+
+<b>------------------- EXAMPLE -------------------</b> <br><br>
 <b>Question</b>:<br>
 What does the doctor think of Heelys?<br>
 A: They are too expensive to buy.<br>
@@ -46,7 +28,7 @@ B: They are too fast to go.<br>
 C: They are bad for kids' health.<br>
 D: They are good for training.<br><br>
 
-Which answer is most likely? ("A", "B", "C", or "D")<br><br>
+Which option is most likely correct? ("A", "B", "C", or "D")<br><br>
 <b>Evaluator</b>:<br>D<br><br>
 
 <b>Context</b>: "Wearing Heelys for a long time could stop young people from developing their legs."<br><br>
@@ -57,11 +39,11 @@ B: They are too fast to go.<br>
 C: They are bad for kids' health.<br>
 D: They are good for training.<br><br>
 
-Which answer is most likely? ("A", "B", "C", or "D")<br><br>
-<b>Evaluator</b>:<br>C<br><br>
-------------------- Task Done ------------------- <br><br>
-Click "Accept HIT" to start this task.
+Now which option is most likely correct, given the added context? ("A", "B", "C", or "D")<br><br>
+<b>Evaluator</b>:<br>
+C
 """,
     'evaluation_data_dir': '../allennlp/eval/tfidf.o/dev',  # , 'debate_logs.d=A_B.json', 'debate_logs.d=B.json', etc.
     'question_splits': 5,  # max num Q's per passage
+    'num_options': 4,
 }
