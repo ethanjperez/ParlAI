@@ -7,6 +7,7 @@ from parlai.core.params import ParlaiParser
 from parlai.mturk.tasks.context_evaluator.worlds import \
     ContextEvaluationOnboardWorld, ContextEvaluationWorld
 from parlai.mturk.core.mturk_manager import MTurkManager
+from parlai.mturk.core import shared_utils
 from parlai.mturk.tasks.context_evaluator.task_config import task_config
 import os
 import importlib
@@ -24,6 +25,7 @@ def main():
     an MTurk manager and configuring it for the context_evaluator task
     """
     # Get relevant arguments
+    shared_utils.disable_logging()
     argparser = ParlaiParser(False, False)
     argparser.add_parlai_data_path()
     argparser.add_mturk_args()

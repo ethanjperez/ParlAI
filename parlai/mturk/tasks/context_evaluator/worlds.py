@@ -64,10 +64,10 @@ class ContextEvaluationWorld(MTurkTaskWorld):
         random.seed(0)
         if evaluation_data:
             self.num_changed_responses = 0
-            debate_modes = list(evaluation_data.keys())
-            debate_modes.sort()
-            self.example_no_to_debate_mode = [debate_modes[random.randint(0, len(debate_modes) - 1) - opt['option_split_no']] for _ in range(self.max_collected)]
-            print(self.example_no_to_debate_mode)
+            possible_debate_modes = list(evaluation_data.keys())
+            possible_debate_modes.sort()
+            self.sample_debate_modes = [possible_debate_modes[random.randint(0, len(possible_debate_modes) - 1) - opt['option_split_no']] for _ in range(self.max_collected)]
+            print(self.sample_debate_modes)
 
         print(self.mturk_agent.worker_id, "| opt['question_split_no']:", opt['question_split_no'], "| opt['option_split_no']:", opt['option_split_no'])
 
@@ -79,20 +79,12 @@ class ContextEvaluationWorld(MTurkTaskWorld):
         self.mturk_agent.observe(ad)
         self.mturk_agent.act()  # Receive acknowledgement
 
-        ad['text'] = 'Bonuses for the following!\n' \
-                     '1. Beating random guessing for questions without context.\n' \
-                     '2. Beating random guessing noticeably for questions with context.' \
-                     '\n\n(Type to continue.)'
-        self.mturk_agent.observe(ad)
-        self.mturk_agent.act()  # Receive acknowledgement
-
-        ad['text'] = 'Note: Distinct questions are unrelated.' \
-                     '\n\n(Type to continue.)'
+        ad['text'] = 'You\'ll receive a bonus for answering over 35% of questions correct.\n'
         self.mturk_agent.observe(ad)
         self.mturk_agent.act()  # Receive acknowledgement
 
     def parley(self):
-        debate_mode = self.example_no_to_debate_mode[self.num_collected] if self.evaluation_data else None
+        debate_mode = self.sample_debate_modes[self.num_collected] if self.evaluation_data else None
 
         # Get context from dataset teacher agent
         sample = self.task.act()
@@ -103,8 +95,8 @@ class ContextEvaluationWorld(MTurkTaskWorld):
         self.context = '\n'.join([sample['question']] + sample['options'])
 
         # Wrap the context with a prompt telling the turker what to do next
-        ad = {'episode_done': False, 'id': 'Question ' + str(self.num_collected + 1), 'debate_mode': debate_mode, 'qid': sample['qid']}
-        ad['text'] = (self.context + '\n\nWhich option is most likely correct? (' + self.options_str + ')')
+        ad = {'episode_done': False, 'id': 'New Question (#' + str(self.num_collected + 1) + ')', 'debate_mode': debate_mode, 'qid': sample['qid']}
+        ad['text'] = self.context
 
         # Question-only evaluation
         question_response = self.prompt_until_valid_response(ad, sample, 'question')
@@ -138,8 +130,7 @@ class ContextEvaluationWorld(MTurkTaskWorld):
                 self.block_worker = True
                 print(self.mturk_agent.worker_id, '| BLOCK_WORKER:', "feedback['text'] =", feedback['text'])
 
-            ad['text'] = 'We\'d love to improve this task for you going forward. '  \
-                         'Do you have any feedback or suggestions?'
+            ad['text'] = 'How can we improve this MTurk task going forward?'
             self.mturk_agent.observe(ad)
             self.mturk_agent.act()  # Receive feedback
 
@@ -151,22 +142,33 @@ class ContextEvaluationWorld(MTurkTaskWorld):
 
     def prompt_until_valid_response(self, ad, sample, prompt):
         # Initial prompt
+        ad["task_data"] = {
+            "respond_with_form": [
+                {
+                    "type": "choices",
+                    "question": "Which option is most likely correct?",
+                    "choices": ["A", "B", "C", "D"]
+                }
+            ]
+        }
+
         self.mturk_agent.observe(validate(ad))
         self.answer = self.mturk_agent.act()
-        self.answer['text'] = self.answer['text'].upper()
-
-        # Check for improper response
-        while self.answer['text'] not in self.options:
-            ad['id'] = 'System'
-            ad['text'] = 'Please respond with ' + self.options_str
-            self.mturk_agent.observe(validate(ad))
-            self.answer = self.mturk_agent.act()
-            self.answer['text'] = self.answer['text'].upper()
+        response = self.answer['task_data']['form_responses'][0]['response']
+        # self.answer['text'] = self.answer['text'].upper()
+        #
+        # # Check for improper response
+        # while self.answer['text'] not in self.options:
+        #     ad['id'] = 'System'
+        #     ad['text'] = 'Please respond instead with ' + self.options_str
+        #     self.mturk_agent.observe(validate(ad))
+        #     self.answer = self.mturk_agent.act()
+        #     self.answer['text'] = self.answer['text'].upper()
 
         # Evaluate work
         if self.labeled_answer_key in sample:  # NB: Check self.mturk_agent.metrics
             self.num_correct_on_labeled[prompt] = self.num_correct_on_labeled.get(prompt, 0)
-            self.num_correct_on_labeled[prompt] += (self.answer['text'] == sample[self.labeled_answer_key][0])
+            self.num_correct_on_labeled[prompt] += (response == sample[self.labeled_answer_key][0])
             self.num_collected_on_labeled[prompt] = self.num_collected_on_labeled.get(prompt, 0)
             self.num_collected_on_labeled[prompt] += 1
             self.accuracy[prompt] = self.num_correct_on_labeled[prompt] / self.num_collected_on_labeled[prompt]
@@ -178,8 +180,8 @@ class ContextEvaluationWorld(MTurkTaskWorld):
         self.durations[prompt] = self.durations.get(prompt, [])
         self.durations[prompt].append(self.answer['duration'])
         self.answer_to_count_by_prompt[prompt] = self.answer_to_count_by_prompt.get(prompt, {option: 0 for option in self.options})
-        self.answer_to_count_by_prompt[prompt][self.answer['text']] += 1
-        return self.answer['text']
+        self.answer_to_count_by_prompt[prompt][response] += 1
+        return response
 
     def episode_done(self):
         return self.episodeDone
@@ -256,7 +258,11 @@ class ContextEvaluationWorld(MTurkTaskWorld):
         # brings important data together for the task, to later be used for
         # creating the dataset. If data requires pickling, put it in a field
         # called 'needs-pickle'.
+        # TODO: Make this return for each sample: context, question, options, answer, full passage, debate_mode, collected answer, reject_work, block_worker, worker_id, worker response stats, etc.
         return {
             'context': self.context,
-            'acts': [self.question, self.answer],
+            'acts': [self.question, self.answer['task_data']['form_responses'][0]['response']],
+            'reject_work': self.reject_work,
+            'block_worker': self.block_worker,
+            'sample_debate_modes': self.sample_debate_modes,
         }
