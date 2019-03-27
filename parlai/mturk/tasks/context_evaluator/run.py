@@ -66,7 +66,7 @@ def main():
                     active_workers_by_split[(q_spl, o_spl)] / incomplete_hits_by_split[(q_spl, o_spl)])
 
     # Select an agent_id that worker agents will be assigned in their world
-    mturk_agent_id = 'Evaluator'
+    mturk_agent_id = 'Guesser'
 
     # Instantiate an MTurkManager with the given options and a maximum number
     # of agents per world of 1 (based on the length of mturk_agent_ids)
@@ -134,6 +134,7 @@ def main():
             task_opt['option_split_no'] = o_spl
             opt['question_split_no'] = q_spl
             opt['option_split_no'] = o_spl
+            print('Worker starting...')
             print('active_workers_by_split:', active_workers_by_split)
             print('incomplete_hits_by_split:', incomplete_hits_by_split)
             print('active_workers_per_incomplete_hit_by_split:', active_workers_per_incomplete_hit_by_split)
@@ -160,6 +161,10 @@ def main():
             active_workers_per_incomplete_hit_by_split[(q_spl, o_spl)] = (
                     float('inf') if incomplete_hits_by_split[(q_spl, o_spl)] <= 0 else
                     active_workers_by_split[(q_spl, o_spl)] / incomplete_hits_by_split[(q_spl, o_spl)])
+            print('Worker finishing...')
+            print('active_workers_by_split:', active_workers_by_split)
+            print('incomplete_hits_by_split:', incomplete_hits_by_split)
+            print('active_workers_per_incomplete_hit_by_split:', active_workers_per_incomplete_hit_by_split)
 
             # Return the contents for saving
             return world.prep_save_data(workers)

@@ -6,9 +6,8 @@
 from parlai.core.worlds import validate
 from parlai.mturk.core.worlds import MTurkOnboardWorld, MTurkTaskWorld
 
-import math
-from pprint import pprint
 import random
+import time
 
 
 class ContextEvaluationOnboardWorld(MTurkOnboardWorld):
@@ -52,14 +51,17 @@ class ContextEvaluationWorld(MTurkTaskWorld):
         self.accuracy = {}
         self.num_collected = 0
         self.max_collected = len(self.task.examples)
-        self.labeled_answer_key = 'eval_labels'
         self.num_changed_responses = None
         self.options = ['A', 'B', 'C', 'D']  # NB: Remove 'D' for DREAM!
-        self.options_str = '"A", "B", "C", or "D"'  # NB: Remove 'D' for DREAM!
         self.answer_to_count_by_prompt = {}
         self.durations = {}
         self.reject_work = False
         self.block_worker = False
+        self.include_q_only_eval = False
+        self.bonus_acc_threshold = {
+            'context_question': .7,
+            'question': .35,
+        }
 
         random.seed(0)
         if evaluation_data:
@@ -71,35 +73,37 @@ class ContextEvaluationWorld(MTurkTaskWorld):
 
         print(self.mturk_agent.worker_id, "| opt['question_split_no']:", opt['question_split_no'], "| opt['option_split_no']:", opt['option_split_no'])
 
-        # Initial instructions
-        ad = {'id': 'System'}
-        ad['text'] = 'Welcome! You\'ll be answering ' + str(self.max_collected) + \
-                     ' short questions' + (', once without any context and once with some context' if self.evaluation_data else '') + '. ' \
-                     '\n\nType anything to continue.'
-        self.mturk_agent.observe(ad)
-        self.mturk_agent.act()  # Receive acknowledgement
-
-        ad['text'] = 'You\'ll receive a bonus for answering over 35% of questions correct.\n'
-        self.mturk_agent.observe(ad)
-        self.mturk_agent.act()  # Receive acknowledgement
+        # # Initial instructions
+        # ad = {'id': 'System'}
+        # ad['text'] = 'Welcome! You\'ll be answering ' + str(self.max_collected) + \
+        #              ' short questions, ' + ('given some' if self.evaluation_data else 'without any') + ' of the context necessary to answer the question.' \
+        #              '\n\nYou\'ll receive a bonus for answering ' + str(self.bonus_acc_threshold['context_question'] * 100) + '% or more of questions correct.\n'
+        # ad["task_data"] = {
+        #     "respond_with_form": [
+        #         {
+        #             "type": "choices",
+        #             "question": "Does this make sense?",
+        #             "choices": ["Great!", "Challenge accepted.", "Looking forward to it!", "Bring it on"]
+        #         }
+        #     ]
+        # }
+        # self.mturk_agent.observe(ad)
+        # self.mturk_agent.act()  # Receive acknowledgement
 
     def parley(self):
         debate_mode = self.sample_debate_modes[self.num_collected] if self.evaluation_data else None
 
         # Get context from dataset teacher agent
         sample = self.task.act()
-        print(self.mturk_agent.worker_id,
-              '| qid:', sample['qid'],
-              '| debate_mode:', debate_mode,
-              '| eval_label:', sample[self.labeled_answer_key])  # Manually add or load eval labels
         self.context = '\n'.join([sample['question']] + sample['options'])
 
-        # Wrap the context with a prompt telling the turker what to do next
-        ad = {'episode_done': False, 'id': 'New Question (#' + str(self.num_collected + 1) + ')', 'debate_mode': debate_mode, 'qid': sample['qid']}
-        ad['text'] = self.context
+        ad = {'episode_done': False, 'debate_mode': debate_mode, 'qid': sample['qid']}
 
         # Question-only evaluation
-        question_response = self.prompt_until_valid_response(ad, sample, 'question')
+        if self.include_q_only_eval:
+            ad['id'] = 'New Question (#' + str(self.num_collected + 1) + ')'
+            ad['text'] = self.context
+            question_response = self.prompt_and_receive_response(ad, sample, 'question')
 
         # Context+Question evaluation
         if self.evaluation_data:
@@ -108,11 +112,11 @@ class ContextEvaluationWorld(MTurkTaskWorld):
             for punct in {'.', '?', '!', ';', ','}:
                 sentences_chosen = sentences_chosen.replace(' ' + punct, punct)
             self.context = sentences_chosen + '\n\n' + self.context
-            ad['text'] = (self.context +
-                          '\n\nNow which option is most likely correct, given the added context? (' + self.options_str + ')')
-            ad['id'] = 'Context ' + str(self.num_collected + 1)
-            context_question_response = self.prompt_until_valid_response(ad, sample, 'context_question')
-            self.num_changed_responses += (context_question_response != question_response)
+            ad['text'] = (self.context)
+            ad['id'] = 'New Context and Question (#' + str(self.num_collected + 1) + ')'
+            context_question_response = self.prompt_and_receive_response(ad, sample, 'context_question')
+            if self.include_q_only_eval:
+                self.num_changed_responses += (context_question_response != question_response)
 
         # Terminate episode (if applicable)
         self.num_collected += 1
@@ -121,18 +125,30 @@ class ContextEvaluationWorld(MTurkTaskWorld):
             ad['text'] = 'All done!'
             self.mturk_agent.observe(ad)
 
-            ad['text'] = 'How likely are you to recommend this task to a colleague, on a scale of 0-10?'
+            ad['text'] = 'How likely are you to recommend this task to a colleague?'
+            ad["task_data"] = {
+                "respond_with_form": [
+                    {
+                        "type": "choices",
+                        "question": "On a scale of 0-10",
+                        "choices": ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]
+                    }
+                ]
+            }
             self.mturk_agent.observe(ad)
             feedback = self.mturk_agent.act()  # Receive feedback
-            if feedback['text'] in self.options:  # Turker is being lazy and just hitting answer options without reading
+            task_rating = feedback['task_data']['form_responses'][0]['response']
+            if task_rating in self.options:  # Turker is being lazy and just hitting answer options without reading
                 self.reject_work = True
-                print(self.mturk_agent.worker_id, '| REJECT_WORK:', "feedback['text'] =", feedback['text'])
+                print(self.mturk_agent.worker_id, '| REJECT_WORK:', "task_rating =", task_rating)
                 self.block_worker = True
-                print(self.mturk_agent.worker_id, '| BLOCK_WORKER:', "feedback['text'] =", feedback['text'])
+                print(self.mturk_agent.worker_id, '| BLOCK_WORKER:', "task_rating =", task_rating)
 
-            ad['text'] = 'How can we improve this MTurk task going forward?'
+            ad['text'] = 'How can we improve this task?'
+            ad["task_data"] = {"respond_with_form": None}
             self.mturk_agent.observe(ad)
-            self.mturk_agent.act()  # Receive feedback
+            feedback = self.mturk_agent.act()  # Receive feedback
+            print(self.mturk_agent.worker_id, '| task_rating:', task_rating, '| written_feedback:', feedback['text'])
 
             ad['episode_done'] = True
             self.episodeDone = True
@@ -140,8 +156,7 @@ class ContextEvaluationWorld(MTurkTaskWorld):
             ad['text'] = 'Thanks for your help!'
             self.mturk_agent.observe(ad)
 
-    def prompt_until_valid_response(self, ad, sample, prompt):
-        # Initial prompt
+    def prompt_and_receive_response(self, ad, sample, prompt):
         ad["task_data"] = {
             "respond_with_form": [
                 {
@@ -151,30 +166,30 @@ class ContextEvaluationWorld(MTurkTaskWorld):
                 }
             ]
         }
-
         self.mturk_agent.observe(validate(ad))
+
+        # ad["id"] = 'Prompt'
+        # ad["text"] = 'Which option is most likely correct?' if not self.include_q_only_eval else \
+        #              'Now which option is most likely correct, given the added context?'
+        # self.mturk_agent.observe(validate(ad))
+        # time.sleep(3)  # Mitigate accidental or intentional answer spamming
         self.answer = self.mturk_agent.act()
         response = self.answer['task_data']['form_responses'][0]['response']
-        # self.answer['text'] = self.answer['text'].upper()
-        #
-        # # Check for improper response
-        # while self.answer['text'] not in self.options:
-        #     ad['id'] = 'System'
-        #     ad['text'] = 'Please respond instead with ' + self.options_str
-        #     self.mturk_agent.observe(validate(ad))
-        #     self.answer = self.mturk_agent.act()
-        #     self.answer['text'] = self.answer['text'].upper()
 
         # Evaluate work
-        if self.labeled_answer_key in sample:  # NB: Check self.mturk_agent.metrics
+        if 'eval_labels' in sample:  # NB: Check self.mturk_agent.metrics
             self.num_correct_on_labeled[prompt] = self.num_correct_on_labeled.get(prompt, 0)
-            self.num_correct_on_labeled[prompt] += (response == sample[self.labeled_answer_key][0])
+            self.num_correct_on_labeled[prompt] += (response == sample['eval_labels'][0])
             self.num_collected_on_labeled[prompt] = self.num_collected_on_labeled.get(prompt, 0)
             self.num_collected_on_labeled[prompt] += 1
             self.accuracy[prompt] = self.num_correct_on_labeled[prompt] / self.num_collected_on_labeled[prompt]
-            print(self.mturk_agent.worker_id,
-                  prompt.upper(), 'Acc:',
-                  self.num_correct_on_labeled[prompt], '/', self.num_collected_on_labeled[prompt])
+        print(self.mturk_agent.worker_id,
+              '| prompt:', prompt,
+              '| response:', response,
+              '| debate_mode:', ad['debate_mode'],
+              '| duration:', round(self.answer['duration'] / 1000., 1),
+              '| qid:', sample['qid'],
+              '' if 'eval_labels' not in sample else '| accuracy: ' + str(self.num_correct_on_labeled[prompt]) + '/' + str(self.num_collected_on_labeled[prompt]))
 
         # Update answer stats and return
         self.durations[prompt] = self.durations.get(prompt, [])
@@ -192,8 +207,7 @@ class ContextEvaluationWorld(MTurkTaskWorld):
 
     def review_work(self):
         # Can review the work here to accept or reject it
-        # NB: Use self.mturk_agent.metrics?
-        if self.num_changed_responses is not None:
+        if self.include_q_only_eval and (self.num_changed_responses is not None):
             freq_changed_responses = (self.num_changed_responses / self.num_collected)
             if freq_changed_responses <= .2:
                 # If you're not updating your response often, you're probably not reading closely
@@ -211,6 +225,7 @@ class ContextEvaluationWorld(MTurkTaskWorld):
                 if freq >= .65:
                     self.reject_work = True
                     print(self.mturk_agent.worker_id, '| REJECT_WORK:', answer, "freq =", freq)
+                    # TODO: Add soft block
                     if freq >= .8:
                         self.block_worker = True
                         print(self.mturk_agent.worker_id, '| BLOCK_WORKER:', answer, "freq =", freq)
@@ -224,7 +239,7 @@ class ContextEvaluationWorld(MTurkTaskWorld):
         for prompt, durations in self.durations.items():
             durations.sort()
             median_duration = durations[len(durations) // 2]
-            if median_duration <= 3000:
+            if median_duration <= 4000:
                 print(self.mturk_agent.worker_id, '| REJECT_WORK:', "median_duration =", median_duration)
                 if median_duration <= 2000:
                     print(self.mturk_agent.worker_id, '| BLOCK_WORKER:', "median_duration =", median_duration)
@@ -237,19 +252,19 @@ class ContextEvaluationWorld(MTurkTaskWorld):
             self.mturk_agent.reject_work('Accuracy')
         else:
             self.mturk_agent.approve_work()
-            bonus_amount = round(.25 * self.reward, 2)
-            if self.accuracy['question'] >= .35:
+            bonus_amount = round(.5 * self.reward, 2)
+            if self.accuracy['question'] >= self.bonus_acc_threshold['question']:
                 # Bonus if you're decently better than random, even with just question+options -only
                 self.mturk_agent.pay_bonus(bonus_amount, 'Great question-only accuracy!')
                 print(self.mturk_agent.worker_id,
                       '| PAY_BONUS:', "self.accuracy['question'] =", self.accuracy['question'])
 
-            if self.accuracy['context_question'] >= .7:
+            if self.accuracy['context_question'] >= self.bonus_acc_threshold['context_question']:
                 self.mturk_agent.pay_bonus(bonus_amount, 'Great question+context accuracy!')
                 print(self.mturk_agent.worker_id,
                       '| PAY_BONUS:', "self.accuracy['context_question'] =", self.accuracy['context_question'])
 
-            if (self.num_changed_responses is not None) and (freq_changed_responses >= .5):
+            if self.include_q_only_eval and (self.num_changed_responses is not None) and (freq_changed_responses >= .5):
                 self.mturk_agent.pay_bonus(bonus_amount, 'Great job!')
                 print(self.mturk_agent.worker_id,
                       '| PAY_BONUS:', "freq_changed_responses =", freq_changed_responses)
