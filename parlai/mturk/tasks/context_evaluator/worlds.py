@@ -80,28 +80,31 @@ class ContextEvaluationWorld(MTurkTaskWorld):
             self.sample_debate_modes = [possible_debate_modes[random.randint(0, len(possible_debate_modes) - 1) - opt['option_split_no']] for _ in range(self.max_collected)]
             print(self.sample_debate_modes)
 
-        self.num_test_turns = 2
-        self.test_turns = [1, self.max_collected + self.num_test_turns]
-        self.test_questions = {
-            1: {
-                'text': '"We taught you this just last week!"\n\n' +
-                        'Based on the passage, what does the student not know that the teacher expects him to know for the exam?\n' +
-                        'A. 13 + 12 = 35\n' +
-                        'B. 15 / 5 = 4\n' +
-                        'C. 41 - 22 = 18\n' +
-                        'D. 6 x 4 = 24',
-                'answer': 'D'
-            },
-            self.max_collected + self.num_test_turns: {
-                'text': '"Wow, I never knew a banana could be that color."\n\n' +
-                        'When Fred opens his pantry, he is surprised the banana is not colored _.\n' +
-                        'A. Gray-ish blue\n' +
-                        'B. Purple and pink\n' +
-                        'C. Green or yellow\n' +
-                        'D. Plain white',
-                'answer': 'C'
-            },
-        }
+        self.num_test_turns = 0  # 2
+        self.test_turns = []
+        self.test_questions = {}
+        if self.num_test_turns == 2:
+            self.test_turns = [1, self.max_collected + self.num_test_turns]
+            self.test_questions = {
+                1: {
+                    'text': '"We taught you this just last week!"\n\n' +
+                            'Based on the passage, what does the student not know that the teacher expects him to know for the exam?\n' +
+                            'A. 13 + 12 = 35\n' +
+                            'B. 15 / 5 = 4\n' +
+                            'C. 41 - 22 = 18\n' +
+                            'D. 6 x 4 = 24',
+                    'answer': 'D'
+                },
+                self.max_collected + self.num_test_turns: {
+                    'text': '"Wow, I never knew a banana could be that color."\n\n' +
+                            'When Fred opens his pantry, he is surprised the banana is not colored _.\n' +
+                            'A. Gray-ish blue\n' +
+                            'B. Purple and pink\n' +
+                            'C. Green or yellow\n' +
+                            'D. Plain white',
+                    'answer': 'C'
+                },
+            }
         for example_no in self.test_questions.keys():
             self.test_questions[example_no]['id'] = 'New Context and Question (#' + str(example_no) + ')'
         assert self.num_test_turns == len(self.test_turns), 'self.num_test_turns != len(self.test_turns)'
@@ -119,9 +122,8 @@ class ContextEvaluationWorld(MTurkTaskWorld):
             ad = self.test_questions[example_no]
             response = self.prompt_and_receive_response(ad, 'context_question', None)
             if ad['answer'] != response:
-                reason = 'Test failed: Example ' + str(example_no) + ' - Answered ' + response + ' not ' + ad['answer']
-                self.reject_reasons.append(reason)
-                self.block_reasons.append(reason)
+                reason = 'Test failed: Example ' + str(example_no) + ' - Answered ' + response + ' not ' + (ad['answer'] if ad['answer'] is not None else ad['text'])
+                # self.reject_reasons.append(reason)
             self.num_tested += 1
             return
         elif example_no > (self.max_collected + self.num_test_turns):
@@ -141,11 +143,11 @@ class ContextEvaluationWorld(MTurkTaskWorld):
                 ]
             }
             self.mturk_agent.observe(ad)
+            time.sleep(.5)
             task_rating_answer = self.mturk_agent.act()  # Receive task rating
             task_rating = task_rating_answer['task_data']['form_responses'][0]['response']
-            if task_rating in self.options:  # Turker is being lazy and just hitting answer options without reading
-                self.reject_reasons.append('task_rating = ' + str(task_rating))
-                self.block_reasons.append('task_rating = ' + str(task_rating))
+            # if task_rating in self.options:  # Turker is just hitting answer options without reading
+            #     self.reject_reasons.append('task_rating = ' + str(task_rating))
 
             ad['text'] = 'How can we improve this task?'
             ad["task_data"] = {"respond_with_form": None}
@@ -207,6 +209,7 @@ class ContextEvaluationWorld(MTurkTaskWorld):
         }]}
         self.mturk_agent.observe(validate(ad))
 
+        time.sleep(.5)
         answer = self.mturk_agent.act()
         if 'task_data' not in answer:
             print(self.mturk_agent.worker_id, '| DISCONNECT:', answer)
@@ -269,10 +272,10 @@ class ContextEvaluationWorld(MTurkTaskWorld):
             durations.sort()
             median_duration = durations[len(durations) // 2]
             median_durations.append(median_duration)
-            if median_duration <= 7000:
+            if median_duration <= 5000:
                 reason = 'median_duration = ' + str(median_duration)
                 self.reject_reasons.append(reason)
-                if median_duration <= 3500:
+                if median_duration <= 2500:
                     self.block_reasons.append(reason)
 
         # Turker answer distribution shouldn't be too peaky
@@ -280,13 +283,12 @@ class ContextEvaluationWorld(MTurkTaskWorld):
             for answer, count in answer_to_count.items():
                 freq = count / self.num_collected
                 reason = answer + ' freq = ' + str(freq)
-                if freq >= .6:
+                if freq >= .7:
                     self.reject_reasons.append(reason)
-                    if freq >= .8:
+                    if freq >= .85:
                         self.block_reasons.append(reason)
-                if (freq <= 0) and (min(median_durations) <= 12000):
-                    self.reject_reasons.append(reason)
-                    self.block_reasons.append(reason)
+                # if (freq <= 0) and (min(median_durations) <= 10000):
+                #     self.reject_reasons.append(reason)
 
         print(self.mturk_agent.worker_id, 'Done! | num_debate_mode_responses:', self.num_debate_mode_responses, '/', self.num_collected,
               '| block_reasons:', self.block_reasons,
@@ -300,16 +302,17 @@ class ContextEvaluationWorld(MTurkTaskWorld):
         else:
             self.mturk_agent.approve_work()
             bonus_amount = round(.5 * self.reward, 2)
-            if ('question' in self.accuracy) and (self.accuracy['question'] >= self.bonus_acc_threshold['question']):
-                # Bonus if you're decently better than random, even with just question+options -only
-                self.mturk_agent.pay_bonus(bonus_amount, 'Great accuracy!')
-                print(self.mturk_agent.worker_id,
-                      '| PAY_BONUS:', "self.accuracy['question'] =", self.accuracy['question'])
 
             if ('context_question' in self.accuracy) and (self.accuracy['context_question'] >= self.bonus_acc_threshold['context_question']):
                 self.mturk_agent.pay_bonus(bonus_amount, 'Great accuracy!')
                 print(self.mturk_agent.worker_id,
                       '| PAY_BONUS:', "self.accuracy['context_question'] =", self.accuracy['context_question'])
+
+            if ('question' in self.accuracy) and (self.accuracy['question'] >= self.bonus_acc_threshold['question']):
+                # Bonus if you're decently better than random, even with just question+options -only
+                self.mturk_agent.pay_bonus(bonus_amount, 'Great accuracy!')
+                print(self.mturk_agent.worker_id,
+                      '| PAY_BONUS:', "self.accuracy['question'] =", self.accuracy['question'])
 
             if self.include_q_only_eval and (self.num_changed_responses is not None) and (freq_changed_responses >= .5):
                 self.mturk_agent.pay_bonus(bonus_amount, 'Great job overall!')
