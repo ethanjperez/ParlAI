@@ -37,38 +37,3 @@ Which option is most likely correct?<br>
     'question_splits': 5,  # max num Q's per passage
     'num_options': 4,
 }
-
-"""
-Guess a question's answer in 2 settings:<br>
-1. Without any of the necessary context to answer the question.<br>
-2. With some context sentence(s) that may or may not cause you to change your answer.<br><br>
-
-Often the answer will be tough to determine (especially without any context). Here, just give your best guess.<br><br>
-
-<b>Estimated Time</b> (all questions in HIT): 11 minutes.<br>
-<b>Accuracy Bonus</b>: Up to $1.5/HIT<br>
-<b>Payout</b>: Immediate<br><br>
-
-<b>------------------- EXAMPLE -------------------</b> <br><br>
-<b>Question</b>:<br>
-What does the doctor think of Heelys?<br>
-A: They are too expensive to buy.<br>
-B: They are too fast to go.<br>
-C: They are bad for kids' health.<br>
-D: They are good for training.<br><br>
-
-Which option is most likely correct?<br><br>
-<b>Evaluator</b>:<br>D<br><br>
-
-<b>Context</b>: "Wearing Heelys for a long time could stop young people from developing their legs."<br><br>
-
-What does the doctor think of Heelys?<br>
-A: They are too expensive to buy.<br>
-B: They are too fast to go.<br>
-C: They are bad for kids' health.<br>
-D: They are good for training.<br><br>
-
-Now which option is most likely correct, given the added context?<br><br>
-<b>Guesser</b>:<br>
-C
-"""
