@@ -39,6 +39,8 @@ class ContextEvaluationWorld(MTurkTaskWorld):
 
     def __init__(self, opt, task, mturk_agent, evaluation_data):
         self.reward = opt['reward']
+        self.question_split_no = opt['question_split_no']
+        self.option_split_no = opt['option_split_no']
         self.task = task
         self.mturk_agent = mturk_agent
         self.evaluation_data = evaluation_data
@@ -318,7 +320,6 @@ class ContextEvaluationWorld(MTurkTaskWorld):
         # brings important data together for the task, to later be used for
         # creating the dataset. If data requires pickling, put it in a field
         # called 'needs-pickle'.
-        # TODO: Return model-chosen sentence, etc. per-sample
         return {
             'data': self.data,
             'worker_id': self.mturk_agent.worker_id,
@@ -328,4 +329,6 @@ class ContextEvaluationWorld(MTurkTaskWorld):
             'reject_reasons': self.reject_reasons,
             'block_reasons': self.block_reasons,
             'accuracy': self.accuracy,
+            'question_split_no': self.question_split_no,
+            'option_split_no': self.option_split_no,
         }
