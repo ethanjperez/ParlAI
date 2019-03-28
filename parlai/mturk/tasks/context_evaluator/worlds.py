@@ -66,7 +66,7 @@ class ContextEvaluationWorld(MTurkTaskWorld):
         self.feedback = None
         self.include_q_only_eval = False
         self.bonus_acc_threshold = {
-            'context_question': .7,
+            'context_question': .5,
             'question': .35,
         }
         self.debate_mode_to_option = {'Ⅰ': 'A', 'Ⅱ': 'B', 'Ⅲ': 'C', 'Ⅳ': 'D'}
