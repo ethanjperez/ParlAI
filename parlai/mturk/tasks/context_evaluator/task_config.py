@@ -17,7 +17,7 @@ These questions are from passage-based reading comprehension exams. You\'ll answ
 <b>NOTE</b>: As a result, questions often appear nonsensical, or the answer may be outright <i>impossible</i> to determine. Here, don\'t stress - just give your best guess! The task is meant to be fun not frustrating. We\'ve also set this task\'s bonus criteria lower to account for the difficulty.<br><br>
 
 <b>Questions in HIT</b>: 19-20<br>
-<b>Time</b>: ~11 minutes<br>
+<b>Time</b>: 11 minutes<br>
 <b>Accuracy Bonus</b>: Up to 50% of HIT value for over 50% answering accuracy<br>
 <b>Payout</b>: Immediate<br><br>
 
