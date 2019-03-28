@@ -12,11 +12,11 @@ task_config = {
     'task_description': """
 Guess a question's answer, given a context sentence that may or may not influence your answer.<br><br>
 
-Often the answer will be tough to determine. Here, just give your best guess.<br><br>
+<b>NOTE</b>: Often the answer will be outright <i>impossible</i> to determine. Here, don\'t stress - just give your best guess! We\'ve set this task\'s bonus criteria lower to account for this.<br><br>
 
-<b>Number of questions in HIT</b>: 19-20 questions<br>
-<b>Estimated Time</b>: 11 minutes<br>
-<b>Accuracy Bonus</b>: Up to 50% of HIT value for 70+% answering accuracy<br>
+<b>Questions in HIT</b>: 21-22<br>
+<b>Time</b>: ~11 minutes<br>
+<b>Accuracy Bonus</b>: Up to 50% of HIT value for over 50% answering accuracy<br>
 <b>Payout</b>: Immediate<br><br>
 
 <b>------------------- EXAMPLE -------------------</b> <br><br>

@@ -156,7 +156,7 @@ def main():
             world.review_work()
 
             active_workers_by_split[(q_spl, o_spl)] = max(0, active_workers_by_split[(q_spl, o_spl)] - 1)
-            if not world.reject_work:
+            if len(world.reject_reasons) == 0:
                 incomplete_hits_by_split[(q_spl, o_spl)] = max(0, incomplete_hits_by_split[(q_spl, o_spl)] - 1)
             active_workers_per_incomplete_hit_by_split[(q_spl, o_spl)] = (
                     float('inf') if incomplete_hits_by_split[(q_spl, o_spl)] <= 0 else
