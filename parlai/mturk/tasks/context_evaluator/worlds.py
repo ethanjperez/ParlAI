@@ -64,6 +64,7 @@ class ContextEvaluationWorld(MTurkTaskWorld):
         self.block_reasons = []
         self.task_rating = None
         self.feedback = None
+        self.hit_done = False
         self.include_q_only_eval = False
         self.bonus_acc_threshold = {
             'context_question': .5,
@@ -78,7 +79,6 @@ class ContextEvaluationWorld(MTurkTaskWorld):
             possible_debate_modes = list(evaluation_data.keys())
             possible_debate_modes.sort()
             self.sample_debate_modes = [possible_debate_modes[random.randint(0, len(possible_debate_modes) - 1) - opt['option_split_no']] for _ in range(self.max_collected)]
-            print(self.sample_debate_modes)
 
         self.num_test_turns = 0  # 2
         self.test_turns = []
@@ -130,6 +130,13 @@ class ContextEvaluationWorld(MTurkTaskWorld):
             ad = {}
             ad['id'] = 'System'
             ad['text'] = 'All done!'
+            for prompt, num_correct_for_prompt in self.num_correct_on_labeled.items():
+                if prompt == 'question':
+                    ad['text'] += ' With just questions and options, you got ' + str(num_correct_for_prompt) + ' questions right :)'
+                elif prompt == 'context_question':
+                    ad['text'] += ' With the questions and contexts, you got ' + str(num_correct_for_prompt) + ' questions right :)'
+                else:
+                    ad['text'] += ' You got ' + str(num_correct_for_prompt) + ' questions right :)'
             self.mturk_agent.observe(ad)
 
             ad['text'] = 'How likely are you to recommend this task to a colleague?'
@@ -145,22 +152,23 @@ class ContextEvaluationWorld(MTurkTaskWorld):
             self.mturk_agent.observe(ad)
             time.sleep(.5)
             task_rating_answer = self.mturk_agent.act()  # Receive task rating
-            task_rating = task_rating_answer['task_data']['form_responses'][0]['response']
+            self.task_rating = task_rating_answer['task_data']['form_responses'][0]['response']
             # if task_rating in self.options:  # Turker is just hitting answer options without reading
-            #     self.reject_reasons.append('task_rating = ' + str(task_rating))
+            #     self.reject_reasons.append('task_rating = ' + str(self.task_rating))
 
             ad['text'] = 'How can we improve this task?'
             ad["task_data"] = {"respond_with_form": None}
             self.mturk_agent.observe(ad)
             feedback_answer = self.mturk_agent.act()  # Receive general text feedback
             self.feedback = feedback_answer['text']
-            print(self.mturk_agent.worker_id, '| task_rating:', task_rating, '| feedback:', self.feedback)
+            print(self.mturk_agent.worker_id, '| task_rating:', self.task_rating, '| feedback:', self.feedback)
 
             ad['episode_done'] = True
             self.episodeDone = True
 
             ad['text'] = 'Thanks for your help!'
             self.mturk_agent.observe(ad)
+            self.hit_done = True
             return
         else:
             # Get context from dataset teacher agent
@@ -257,6 +265,11 @@ class ContextEvaluationWorld(MTurkTaskWorld):
         self.mturk_agent.shutdown()
 
     def review_work(self):
+        if not self.hit_done:  # Don't review work if agent disconnected
+            print(self.mturk_agent.worker_id, 'Done! (Disconnected) | num_debate_mode_responses:',
+                  self.num_debate_mode_responses, '/', self.num_collected)
+            return
+
         # Can review the work here to accept or reject it
         if self.include_q_only_eval and (self.num_changed_responses is not None):
             freq_changed_responses = (self.num_changed_responses / self.num_collected)
@@ -331,6 +344,7 @@ class ContextEvaluationWorld(MTurkTaskWorld):
             'feedback': self.feedback,
             'reject_reasons': self.reject_reasons,
             'block_reasons': self.block_reasons,
+            'hit_done': self.hit_done,
             'accuracy': self.accuracy,
             'question_split_no': self.question_split_no,
             'option_split_no': self.option_split_no,

@@ -156,7 +156,7 @@ def main():
             world.review_work()
 
             active_workers_by_split[(q_spl, o_spl)] = max(0, active_workers_by_split[(q_spl, o_spl)] - 1)
-            if len(world.reject_reasons) == 0:
+            if world.hit_done and (len(world.reject_reasons) == 0):
                 incomplete_hits_by_split[(q_spl, o_spl)] = max(0, incomplete_hits_by_split[(q_spl, o_spl)] - 1)
             active_workers_per_incomplete_hit_by_split[(q_spl, o_spl)] = (
                     float('inf') if incomplete_hits_by_split[(q_spl, o_spl)] <= 0 else
@@ -165,6 +165,9 @@ def main():
             print('active_workers_by_split:', active_workers_by_split)
             print('incomplete_hits_by_split:', incomplete_hits_by_split)
             print('active_workers_per_incomplete_hit_by_split:', active_workers_per_incomplete_hit_by_split)
+            if max(list(incomplete_hits_by_split.values())) <= 0:
+                print('********** COMPLETED HITS! **********')
+                mturk_manager.completed_conversations = mturk_manager.num_conversations  # Signal no more HITs needed
 
             # Return the contents for saving
             return world.prep_save_data(workers)
