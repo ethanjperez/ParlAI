@@ -8,7 +8,8 @@ from parlai.mturk.tasks.context_evaluator.worlds import \
     ContextEvaluationOnboardWorld, ContextEvaluationWorld
 from parlai.mturk.core.mturk_manager import MTurkManager
 from parlai.mturk.core import shared_utils
-from parlai.mturk.tasks.context_evaluator.task_config import task_config
+from parlai.mturk.tasks.context_evaluator.task_config import task_configs
+from pprint import pprint
 import os
 import importlib
 import json
@@ -30,52 +31,54 @@ def main():
     argparser.add_parlai_data_path()
     argparser.add_mturk_args()
     argparser.add_context_evaluation_args()
-    opt = argparser.parse_args()
+    opt = argparser.parse_args(print_args=False)
 
     # Set the task name to be the folder name
     opt['task'] = os.path.basename(os.path.dirname(os.path.abspath(__file__)))
 
-    # append the contents of task_config.py to the configuration
-    opt.update(task_config)
+    # Append the contents of task_config.py to the configuration
+    opt.update(task_configs['general'])
+    if opt['prompt_type'] not in {'question', 'quote and question'}:
+        raise NotImplementedError('Not implemented prompt_type \"' + str(opt['prompt_type']), '\"')
+    opt.update(task_configs[opt['prompt_type']])
+    if opt['is_sandbox']:
+        opt.update(task_configs['sandbox'])
+    else:
+        opt.update(task_configs['live'])
+    pprint(opt)
 
-    # Initialize a dataset agent, which we will get context from
-    module_name = 'parlai.tasks.race.agents'
-    class_name = 'IndexTeacher'
-    my_module = importlib.import_module(module_name)
-    task_class = getattr(my_module, class_name)
-    task_opt = opt.copy()
-    task_opt['datapath'] = opt['datapath']
-    task_opt['datatype'] = 'dev.num_passages=13'
-
+    # Load data to evaluate
     evaluation_data = None
-    if task_opt['evaluation_data_dir'] is not None:
+    if opt['evaluation_data_dir'] is not None:
         evaluation_data = {}
-        for filename in os.listdir(task_opt['evaluation_data_dir']):
-            with open(os.path.join(task_opt['evaluation_data_dir'], filename)) as json_file:
+        for filename in os.listdir(opt['evaluation_data_dir']):
+            with open(os.path.join(opt['evaluation_data_dir'], filename)) as json_file:
                 evaluation_data[filename[:-5]] = json.load(json_file)
 
-    # The values in these maps should always be non-negative
+    # Track which evaluation splits have been / are being worked on
     global active_workers_per_incomplete_hit_by_split, active_workers_by_split, incomplete_hits_by_split
+    # The values in these maps should always be non-negative
     active_workers_per_incomplete_hit_by_split, active_workers_by_split, incomplete_hits_by_split = {}, {}, {}
-    for q_spl in range(task_config['question_splits']):
-        for o_spl in range(task_config['num_options']):
+    for q_spl in range(opt['question_splits']):
+        for o_spl in range(opt['option_splits']):
             active_workers_by_split[(q_spl, o_spl)] = 0
             incomplete_hits_by_split[(q_spl, o_spl)] = opt['num_conversations'] / (
-                    task_config['question_splits'] * task_config['num_options'])
+                    opt['question_splits'] * opt['option_splits'])
             active_workers_per_incomplete_hit_by_split[(q_spl, o_spl)] = (
                     active_workers_by_split[(q_spl, o_spl)] / incomplete_hits_by_split[(q_spl, o_spl)])
 
-    # Select an agent_id that worker agents will be assigned in their world
-    mturk_agent_id = 'Guesser'
+    # Initialize a dataset agent, which we will get quote from
+    task_class = getattr(importlib.import_module('parlai.tasks.race.agents'), 'IndexTeacher')
+    task_opt = opt.copy()
 
     # Instantiate an MTurkManager with the given options and a maximum number
     # of agents per world of 1 (based on the length of mturk_agent_ids)
     mturk_manager = MTurkManager(
         opt=opt,
-        mturk_agent_ids=[mturk_agent_id],
+        mturk_agent_ids=[opt['mturk_agent_id']],
         use_db=True,
     )
-    mturk_manager.setup_server()
+    mturk_manager.setup_server()  # Can pass in os.path.dirname(os.path.abspath(__file__))
 
     # Create an onboard_function, which will be run for workers who have
     # accepted your task and must be completed before they are put in the
@@ -117,7 +120,7 @@ def main():
         # which is useful for having tasks with different possible worker
         # counts.
         def assign_worker_roles(workers):
-            workers[0].id = mturk_agent_id
+            workers[0].id = task_opt['mturk_agent_id']
 
         # Define the task function, which will be run with workers that are
         # as the main task.
