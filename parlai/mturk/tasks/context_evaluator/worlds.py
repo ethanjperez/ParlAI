@@ -167,19 +167,19 @@ class ContextEvaluationOnboardWorld(MTurkOnboardWorld):
         self.mturk_agent.observe(validate(ad))
 
         # Receive response or handle disconnect
-        answer = self.mturk_agent.act()
-        if 'task_data' not in answer:
-            print(self.mturk_agent.worker_id, '| DISCONNECT:', answer)
+        response_message = self.mturk_agent.act()
+        if 'task_data' not in response_message:
+            print(self.mturk_agent.worker_id, '| DISCONNECT:', response_message)
             self.episodeDone = True
             return None
-        response = answer['task_data']['form_responses'][0]['response']
+        response = response_message['task_data']['form_responses'][0]['response']
 
         print(self.mturk_agent.worker_id,
               '| prompt_type:', prompt_type,
               '| response:', response,
               '| debate_mode:', 'TEST', self.cur_example_no,
               '| answer:', answer,
-              '| duration:', round(answer['duration'] / 1000., 1),
+              '| duration:', round(response_message['duration'] / 1000., 1),
               '| qid:', 'TEST', self.cur_example_no)
         return response
 
@@ -331,8 +331,8 @@ class ContextEvaluationWorld(MTurkTaskWorld):
                 }
             }
             self.mturk_agent.observe(ad)
-            task_rating_answer = self.mturk_agent.act()  # Receive task rating
-            self.task_rating = task_rating_answer['task_data']['form_responses'][0]['response']
+            task_rating_message = self.mturk_agent.act()  # Receive task rating
+            self.task_rating = task_rating_message['task_data']['form_responses'][0]['response']
 
             # Solicit free-form text feedback
             ad = {
@@ -342,8 +342,8 @@ class ContextEvaluationWorld(MTurkTaskWorld):
                 'task_data': {"respond_with_form": None},
             }
             self.mturk_agent.observe(ad)
-            feedback_answer = self.mturk_agent.act()
-            self.feedback = feedback_answer['text']
+            feedback_message = self.mturk_agent.act()
+            self.feedback = feedback_message['text']
             print(self.mturk_agent.worker_id, '| task_rating:', self.task_rating, '| feedback:', self.feedback)
 
             # Conclude HIT and send final message
@@ -413,12 +413,12 @@ class ContextEvaluationWorld(MTurkTaskWorld):
         self.mturk_agent.observe(validate(ad))
 
         # Receive response or handle disconnect
-        answer = self.mturk_agent.act()
-        if 'task_data' not in answer:
-            print(self.mturk_agent.worker_id, '| DISCONNECT:', answer)
+        response_message = self.mturk_agent.act()
+        if 'task_data' not in response_message:
+            print(self.mturk_agent.worker_id, '| DISCONNECT:', response_message)
             self.episodeDone = True
             return None
-        response = answer['task_data']['form_responses'][0]['response']
+        response = response_message['task_data']['form_responses'][0]['response']
 
         if sample is not None:
             # Evaluate work on non-qualifying questions
@@ -431,14 +431,14 @@ class ContextEvaluationWorld(MTurkTaskWorld):
 
             # Update answer stats and return
             self.durations[prompt_type] = self.durations.get(prompt_type, [])
-            self.durations[prompt_type].append(answer['duration'])
+            self.durations[prompt_type].append(response_message['duration'])
             self.answer_to_count_by_prompt[prompt_type] = self.answer_to_count_by_prompt.get(prompt_type, {option: 0 for option in self.options})
             self.answer_to_count_by_prompt[prompt_type][response] += 1
             self.data.append({
                 'sample': sample,
                 'context': ad['text'],
                 'response': response,
-                'duration': answer['duration'],
+                'duration': response_message['duration'],
             })
 
         print(self.mturk_agent.worker_id,
@@ -446,7 +446,7 @@ class ContextEvaluationWorld(MTurkTaskWorld):
               '| response:', response,
               '| debate_mode:', self.debate_mode_to_option[sample['debate_mode']] if sample is not None else 'TEST',
               '| answer:', sample['eval_labels'][0] if ((sample is not None) and ('eval_labels' in sample)) else 'TEST',
-              '| duration:', round(answer['duration'] / 1000., 1),
+              '| duration:', round(response_message['duration'] / 1000., 1),
               '| qid:', sample['qid'] if sample is not None else 'TEST',
               '' if (sample is None) or ('eval_labels' not in sample) else
               '| accuracy: ' + str(self.num_correct_on_labeled[prompt_type]) + '/' + str(self.num_collected_on_labeled[prompt_type]))
