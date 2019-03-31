@@ -102,18 +102,20 @@ class ContextEvaluationOnboardWorld(MTurkOnboardWorld):
         self.mturk_agent.observe(ad)
 
         for test_question in self.test_questions[prompt_type]:
-            response = self.prompt_and_receive_response(test_question['text'], prompt_type)
+            response = self.prompt_and_receive_response(test_question['text'], prompt_type, test_question['answer'])
             if test_question['answer'] != response:
                 print(self.mturk_agent.worker_id, '| FAILED', test_question['qid'],
                       '| Answered', response, 'not', test_question['answer'])
-                self.passed_test = False
-                self.mturk_agent.mturk_manager.soft_block_worker(self.mturk_agent.worker_id)
-                ad = {
-                    'episode_done': False,
-                    'id': 'System',
-                    'text': 'The correct answer was ' + str(test_question['answer']) + '.',
-                }
-                self.mturk_agent.observe(ad)
+                if response is not None:
+                    print(self.mturk_agent.worker_id, '| SOFT BLOCKING')
+                    self.mturk_agent.mturk_manager.soft_block_worker(self.mturk_agent.worker_id)
+                    self.passed_test = False
+                    ad = {
+                        'episode_done': False,
+                        'id': 'System',
+                        'text': 'The correct answer was ' + test_question['answer'] + '.',
+                    }
+                    self.mturk_agent.observe(ad)
                 self.episodeDone = True
                 ad = {
                     'episode_done': True,
@@ -141,7 +143,7 @@ class ContextEvaluationOnboardWorld(MTurkOnboardWorld):
         self.mturk_agent.observe(ad)
         time.sleep(3)
 
-    def prompt_and_receive_response(self, prompt_text, prompt_type):
+    def prompt_and_receive_response(self, prompt_text, prompt_type, answer):
         # Clear previous answer from form. Emphasize questions are unrelated.
         ad = {
             'episode_done': False,
@@ -176,6 +178,7 @@ class ContextEvaluationOnboardWorld(MTurkOnboardWorld):
               '| prompt_type:', prompt_type,
               '| response:', response,
               '| debate_mode:', 'TEST', self.cur_example_no,
+              '| answer:', answer,
               '| duration:', round(answer['duration'] / 1000., 1),
               '| qid:', 'TEST', self.cur_example_no)
         return response
@@ -222,7 +225,7 @@ class ContextEvaluationWorld(MTurkTaskWorld):
         self.prompt_types = [opt['prompt_type']]
         self.accuracy_bonus_threshold = {
             'quote and question': 0.5745454545454546,
-            'question': .5,
+            'question': .45,
         }
         self.median_sample_ms_reject_threshold = {
             'quote and question': 7000,
@@ -441,7 +444,8 @@ class ContextEvaluationWorld(MTurkTaskWorld):
         print(self.mturk_agent.worker_id,
               '| prompt_type:', prompt_type,
               '| response:', response,
-              '| debate_mode:', sample['debate_mode'] if sample is not None else 'TEST',
+              '| debate_mode:', self.debate_mode_to_option[sample['debate_mode']] if sample is not None else 'TEST',
+              '| answer:', sample['eval_labels'][0] if ((sample is not None) and ('eval_labels' in sample)) else 'TEST',
               '| duration:', round(answer['duration'] / 1000., 1),
               '| qid:', sample['qid'] if sample is not None else 'TEST',
               '' if (sample is None) or ('eval_labels' not in sample) else
