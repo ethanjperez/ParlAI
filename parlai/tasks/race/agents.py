@@ -74,7 +74,7 @@ class IndexTeacher(FixedDialogTeacher):
                     qid = self._filepath_to_id(art_file, q)
                     self.examples.append({
                         'id': 'race',
-                        'text': '\n'.join([passage_text + '\n', question_text] + options_text),
+                        'text': '\n'.join([passage_text + '\n', question_text + '\n'] + options_text),
                         'labels': options_text[answer_index],
                         'episode_done': True,
                         'answer_starts': answer_index,

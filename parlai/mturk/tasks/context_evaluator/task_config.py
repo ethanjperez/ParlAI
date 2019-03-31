@@ -8,7 +8,7 @@ task_configs = {
     'general': {
         'block_qualification': 'poor performance',
         'count_complete': True,
-        'max_time': 3600,
+        'max_time': 7200,
         'max_time_qual': 'max time',
         'frontend_version': 1,
         'hit_title': 'Guess the answer!',  # Passage comprehension [with just quotes / without the passage]
@@ -43,11 +43,11 @@ task_configs = {
             
             <b>Our Goal</b>: We\'re trying to evaluate how important various passage sentences are for answering each question.<br><br>
             
-            <font color="blue"><b>IMPORTANT</b></font>: Our setup inherently makes some questions nonsensical or impossible to answer. For these questions, just give your best guess! The task is meant to be fun. We also made the bonus requirement easier to account for the task.<br><br>
+            <font color="blue"><b>IMPORTANT</b></font>: Our setup inherently makes some questions nonsensical or impossible to answer. For these questions, just give your best guess! The task is meant to be fun.<br><br>
             
             <b>Questions in HIT</b>: 20<br>
             <b>Time</b>: 11 minutes<br>
-            <b>Bonus</b>: $0.75 for over 50% accuracy<br>
+            <b>Bonus</b>: $0.75 for exceeding average worker accuracy (~57%)<br>
             <b>Payout</b>: Immediate<br>
             <b>Qualifying</b>: Must pass 3 trial questions first<br><br>
             
@@ -55,7 +55,8 @@ task_configs = {
             <b>Passage quote and question</b>:<br>
             "Wearing Heelys for a long time could stop young people from developing their legs."<br><br>
             
-            What does the doctor think of Heelys?<br>
+            What does the doctor think of Heelys?<br><br>
+            
             A: They are too expensive to buy.<br>
             B: They are too fast to go.<br>
             C: They are bad for kids' health.<br>
@@ -77,17 +78,18 @@ task_configs = {
             
             <b>Our Goal</b>: We\'re trying to evaluate how well people can do on reading comprehension exams without reading the passage. Options can often be eliminated by common sense, general knowledge, or the question/option phrasing; if you read closely, you should do notably better than random guessing.<br><br>
             
-            <font color="blue"><b>IMPORTANT</b></font>: Our setup inherently makes some questions nonsensical or impossible to answer. For these questions, just give your best guess! The task is meant to be fun. We also made the bonus requirement easier to account for the task.<br><br>
+            <font color="blue"><b>IMPORTANT</b></font>: Our setup inherently makes some questions nonsensical or impossible to answer. For these questions, just give your best guess! The task is meant to be fun.<br><br>
             
             <b>Questions in HIT</b>: 20<br>
             <b>Time</b>: 7 minutes<br>
-            <b>Bonus</b>: $0.50 for over 50% accuracy<br>
+            <b>Bonus</b>: $0.50 for exceeding average worker accuracy (~50%)<br>
             <b>Payout</b>: Immediate<br>
             <b>Qualifying</b>: Must pass 3 trial questions first<br><br>
             
             <b>------------------- EXAMPLE -------------------</b> <br><br>
             <b>Question</b>:<br>
-            What does the doctor think of Heelys?<br>
+            What does the doctor think of Heelys?<br><br>
+            
             A: They are too expensive to buy.<br>
             B: They are too fast to go.<br>
             C: They are bad for kids' health.<br>

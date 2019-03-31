@@ -94,9 +94,9 @@ def main():
             world.parley()
         if world.passed_test is not None:
             global num_passed_agents
-            num_passed_agents = num_passed_agents + world.passed_test
+            num_passed_agents += world.passed_test
             global num_total_agents
-            num_total_agents += num_total_agents + 1
+            num_total_agents += 1
             print('TEST PASS RATE:', num_passed_agents, '/', num_total_agents)
         world.shutdown()
         return world.prep_save_data([worker])

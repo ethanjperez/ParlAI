@@ -23,62 +23,86 @@ class ContextEvaluationOnboardWorld(MTurkOnboardWorld):
         self.cur_example_no = 1
         self.options = ['A', 'B', 'C', 'D'][:opt['num_options']]
         self.prompt_types = [opt['prompt_type']]
-        self.test_questions = [
-            {
-                'text': '"Wow, I never knew a banana could be that color."\n\n' +
-                        'When Fred opens his pantry, he is surprised the banana is not colored _.\n' +
-                        'A. Gray-ish blue\n' +
-                        'B. Purple and pink\n' +
-                        'C. Green or yellow\n' +
-                        'D. Plain white',
-                'answer': 'C',
-                'qid': 'trial/0',
-            },
-            {
-                'text': 'The film Schindler\'s List also takes place during World War Two.\n\n' +
-                        'What\'s the similarity between Saving Private Ryan and Schindler\'s List?\n' +
-                        'A. They are both humorous.\n' +
-                        'B. They were released at the same time.\n' +
-                        'C. They are both American movies.\n' +
-                        'D. They both happen during World War Two.',
-                'answer': 'D',
-                'qid': 'trial/1',
-            },
-            {
-                'text': 'They are like sheep being led to the slaughterhouse.\n\n'
-                        'The main idea of this passage is that _ .\n' +
-                        'A. Farm animals suffer gruesome deaths.\n' +
-                        'B. In every school there is a "top" crowd that sets the pace.\n' +
-                        'C. At one time or another you probably did something you knew to be wrong.\n'
-                        'D. It is a mistake to follow the "top" crowd blindly.',
-                'answer': 'D',
-                'qid': 'trial/2',
-            },
-            # {
-            #     'text': '"We taught you this just last week!"\n\n' +
-            #             'Based on the passage, what does the student not know that the teacher expects him to know for the exam?\n' +
-            #             'A. 13 + 12 = 35\n' +
-            #             'B. 15 / 5 = 4\n' +
-            #             'C. 41 - 22 = 18\n' +
-            #             'D. 6 x 4 = 24',
-            #     'answer': 'D'
-            #     'qid': 'sample/3',
-            # },
-        ]
-        random.shuffle(self.test_questions)
+        self.test_questions = {
+            'question': [
+                {
+                    'text': 'When Fred opens his pantry, he is surprised the banana is not colored _.\n\n' +
+                            'A. Gray-ish blue\n' +
+                            'B. Purple and pink\n' +
+                            'C. Green or yellow\n' +
+                            'D. Plain white',
+                    'answer': 'C',
+                    'qid': 'question/trial/0',
+                },
+                {
+                    'text': 'He who considers himself to be better and more important than others is likely to _.\n\n' +
+                            'A. have his head in the clouds\n' +
+                            'B. be easy to deal with\n' +
+                            'C. have "common sense"\n' +
+                            'D. have a "big head"',
+                    'answer': 'D',
+                    'qid': 'question/trial/1',
+                },
+                {
+                    'text': 'What does Alan\'s grandfather do every Sunday?\n\n' +
+                            'A. He hosts crazy parties.\n' +
+                            'B. He studies for the medical school entrance exam.\n' +
+                            'C. He flies to Hawaii and back.\n' +
+                            'D. He goes to church with his wife.',
+                    'answer': 'D',
+                    'qid': 'question/trial/2',
+                },
+            ],
+            'quote and question': [
+                {
+                    'text': '"Wow, I never knew a banana could be that color."\n\n' +
+                            'When Fred opens his pantry, he is surprised the banana is not colored _.\n\n' +
+                            'A. Gray-ish blue\n' +
+                            'B. Purple and pink\n' +
+                            'C. Green or yellow\n' +
+                            'D. Plain white',
+                    'answer': 'C',
+                    'qid': 'quote and question/trial/0',
+                },
+                {
+                    'text': 'The film Schindler\'s List also takes place during World War Two.\n\n' +
+                            'What\'s the similarity between Saving Private Ryan and Schindler\'s List?\n\n' +
+                            'A. They are both humorous.\n' +
+                            'B. They were released at the same time.\n' +
+                            'C. They are both American movies.\n' +
+                            'D. They both happen during World War Two.',
+                    'answer': 'D',
+                    'qid': 'quote and question/trial/1',
+                },
+                {
+                    'text': 'They are like sheep being led to the slaughterhouse.\n\n'
+                            'The main idea of this passage is that _ .\n\n' +
+                            'A. Farm animals suffer gruesome deaths.\n' +
+                            'B. In every school there is a "top" crowd that sets the pace.\n' +
+                            'C. At one time or another you probably did something you knew to be wrong.\n'
+                            'D. It is a mistake to follow the "top" crowd blindly.',
+                    'answer': 'D',
+                    'qid': 'quote and question/trial/2',
+                },
+            ],
+        }
+
+        for prompt_type in self.test_questions.keys():
+            random.shuffle(self.test_questions[prompt_type])
 
     def parley(self):
+        prompt_type = self.prompt_types[0]  # NB: Change self.prompt_type[0] if using multiple prompt_types
         ad = {
             'episode_done': False,
             'id': 'System',
-            'text': 'Welcome onboard! We\'ll first give you ' + str(len(self.test_questions)) + ' practice examples to help you understand the task. '
+            'text': 'Welcome onboard! We\'ll first give you ' + str(len(self.test_questions[prompt_type])) +
+                    ' practice examples to help you understand the task. '
                     'To qualify for the HIT, you\'ll need to answer all practice questions correct.',
         }
         self.mturk_agent.observe(ad)
 
-        for test_question in self.test_questions:
-            # NB: Change self.prompt_type[0] if using multiple prompt_types
-            response = self.prompt_and_receive_response(test_question['text'], self.prompt_types[0])
+        for test_question in self.test_questions[prompt_type]:
+            response = self.prompt_and_receive_response(test_question['text'], prompt_type)
             if test_question['answer'] != response:
                 print(self.mturk_agent.worker_id, '| FAILED', test_question['qid'],
                       '| Answered', response, 'not', test_question['answer'])
@@ -112,7 +136,7 @@ class ContextEvaluationOnboardWorld(MTurkOnboardWorld):
         ad = {
             'episode_done': True,
             'id': 'System',
-            'text': 'Great job! Advancing to the real task now...',
+            'text': 'Great job! Advancing to the real task...',
         }
         self.mturk_agent.observe(ad)
         time.sleep(3)
@@ -197,7 +221,7 @@ class ContextEvaluationWorld(MTurkTaskWorld):
         # Prompt type differences
         self.prompt_types = [opt['prompt_type']]
         self.accuracy_bonus_threshold = {
-            'quote and question': .5,
+            'quote and question': 0.5745454545454546,
             'question': .5,
         }
         self.median_sample_ms_reject_threshold = {
@@ -227,7 +251,7 @@ class ContextEvaluationWorld(MTurkTaskWorld):
             self.test_questions = {
                 1: {
                     'text': '"We taught you this just last week!"\n\n' +
-                            'Based on the passage, what does the student not know that the teacher expects him to know for the exam?\n' +
+                            'Based on the passage, what does the student not know that the teacher expects him to know for the exam?\n\n' +
                             'A. 13 + 12 = 35\n' +
                             'B. 15 / 5 = 4\n' +
                             'C. 41 - 22 = 18\n' +
@@ -236,7 +260,7 @@ class ContextEvaluationWorld(MTurkTaskWorld):
                 },
                 self.max_collected + self.num_test_turns: {
                     'text': '"Wow, I never knew a banana could be that color."\n\n' +
-                            'When Fred opens his pantry, he is surprised the banana is not colored _.\n' +
+                            'When Fred opens his pantry, he is surprised the banana is not colored _.\n\n' +
                             'A. Gray-ish blue\n' +
                             'B. Purple and pink\n' +
                             'C. Green or yellow\n' +
@@ -286,7 +310,7 @@ class ContextEvaluationWorld(MTurkTaskWorld):
                 # Congratulate if they beat random
                 random_accuracy = int(round(100. / len(self.options)))
                 if prompt_type_accuracy > (random_accuracy + 10):
-                    ad['text'] += ' That\'s ' + str(prompt_type_accuracy - random_accuracy) + ' better than random guessing. Great work!'
+                    ad['text'] += ' That\'s ' + str(prompt_type_accuracy - random_accuracy) + '% better than random guessing. Great work!'
             self.mturk_agent.observe(ad)
 
             ad = {
@@ -333,7 +357,7 @@ class ContextEvaluationWorld(MTurkTaskWorld):
             # Get prompt text from dataset teacher agent
             sample = self.task.act()
             sample['debate_mode'] = self.sample_debate_modes[self.num_collected] if self.evaluation_data else None
-            prompt_text = '\n'.join([sample['question']] + sample['options'])
+            prompt_text = '\n'.join([sample['question'] + '\n'] + sample['options'])
 
             # Question-only evaluation
             if 'question' in self.prompt_types:
