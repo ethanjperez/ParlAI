@@ -7,26 +7,145 @@ from parlai.core.worlds import validate
 from parlai.mturk.core.worlds import MTurkOnboardWorld, MTurkTaskWorld
 
 import random
+import time
 
 
 class ContextEvaluationOnboardWorld(MTurkOnboardWorld):
     """Example onboarding world. Sends a message from the world to the
     worker and then exits as complete
     """
+    def __init__(self, opt, mturk_agent):
+        # MTurkOnboardWorld init
+        self.mturk_agent = mturk_agent
+        self.episodeDone = False
+
+        self.cur_example_no = 1
+        self.options = ['A', 'B', 'C', 'D'][:opt['num_options']]
+        self.prompt_types = [opt['prompt_type']]
+        self.test_questions = [
+            {
+                'text': '"Wow, I never knew a banana could be that color."\n\n' +
+                        'When Fred opens his pantry, he is surprised the banana is not colored _.\n' +
+                        'A. Gray-ish blue\n' +
+                        'B. Purple and pink\n' +
+                        'C. Green or yellow\n' +
+                        'D. Plain white',
+                'answer': 'C'
+            },
+            {
+                'text': 'The film Schindler\'s List also takes place during World War Two.\n\n' +
+                        'What\'s the similarity between Saving Private Ryan and Schindler\'s List?\n' +
+                        'A. They are both humorous.\n' +
+                        'B. They were released at the same time.\n' +
+                        'C. They are both American movies.\n' +
+                        'D. They both happen during World War Two.',
+                'answer': 'D',
+            },
+            {
+                'text': 'They are like sheep being led to the slaughterhouse.\n\n'
+                        'The main idea of this passage is that _ .\n' +
+                        'A. Farm animals suffer gruesome deaths.\n' +
+                        'B. In every school there is a "top" crowd that sets the pace.\n' +
+                        'C. At one time or another you probably did something you knew to be wrong.\n'
+                        'D. It is a mistake to follow the "top" crowd blindly.',
+                'answer': 'D',
+            },
+            # {
+            #     'text': '"We taught you this just last week!"\n\n' +
+            #             'Based on the passage, what does the student not know that the teacher expects him to know for the exam?\n' +
+            #             'A. 13 + 12 = 35\n' +
+            #             'B. 15 / 5 = 4\n' +
+            #             'C. 41 - 22 = 18\n' +
+            #             'D. 6 x 4 = 24',
+            #     'answer': 'D'
+            # },
+        ]
+        random.shuffle(self.test_questions)
+
     def parley(self):
-        ad = {}
-        ad['id'] = 'System'
-        ad['text'] = 'Welcome onboard! We would like to have you answer several questions given some context. ' \
-                     'Note that each question you answer is independent from other questions.'
+        ad = {
+            'episode_done': False,
+            'id': 'System',
+            'text': 'Welcome onboard! We\'ll first give you ' + str(len(self.test_questions)) + ' practice examples to help you understand the task. '
+                    'To qualify for our HIT, you\'ll need to answer all practice questions correct.',
+        }
         self.mturk_agent.observe(ad)
-        ad['text'] = 'We will be evaluating your answers throughout to check you understand the task ' \
-                     '(we won\'t be able to use your work otherwise). ' \
-                     'We\'ll also give you a bonus if you do well!'
-        self.mturk_agent.observe(ad)
-        ad['text'] = 'Type anything to continue.'
-        self.mturk_agent.observe(ad)
-        self.mturk_agent.act()
+
+        for test_question in self.test_questions:
+            # NB: Change self.prompt_type[0] if using multiple prompt_types
+            response = self.prompt_and_receive_response(test_question['text'], self.prompt_types[0])
+            if test_question['answer'] != response:
+                self.mturk_agent.mturk_manager.soft_block_worker(self.mturk_agent.worker_id)
+                self.mturk_agent.set_hit_is_abandoned()  # NB: May not be the right thing to do
+                ad = {
+                    'episode_done': False,
+                    'id': 'System',
+                    'text': 'The correct answer was ' + str(test_question['answer']) + '.',
+                }
+                self.mturk_agent.observe(ad)
+                self.episodeDone = True
+                ad = {
+                    'episode_done': True,
+                    'id': 'System',
+                    'text': 'Unfortunately, you did not qualify for our task at this time, but we hope to see you again soon!',
+                }
+                self.mturk_agent.observe(ad)
+                return
+            ad = {
+                'episode_done': False,
+                'id': 'System',
+                'text': 'Correct!',
+            }
+            self.mturk_agent.observe(ad)
+            self.cur_example_no += 1
+
         self.episodeDone = True
+        ad = {
+            'episode_done': True,
+            'id': 'System',
+            'text': 'Great job! Advancing to the real task now...',
+        }
+        self.mturk_agent.observe(ad)
+        time.sleep(3)
+
+    def prompt_and_receive_response(self, prompt_text, prompt_type):
+        # Clear previous answer from form. Emphasize questions are unrelated.
+        ad = {
+            'episode_done': False,
+            'id': 'New ' + prompt_type,
+            'text': None,
+            'task_data': {"respond_with_form": None},
+        }
+        self.mturk_agent.observe(validate(ad))
+
+        # Data collection prompt
+        ad = {
+            'episode_done': False,
+            'id': '(#' + str(self.cur_example_no) + ')',
+            'text': prompt_text,
+            'task_data': {"respond_with_form": [{
+                "type": "choices",
+                "question": "Which option is most likely correct?",
+                "choices": self.options
+            }]}
+        }
+        self.mturk_agent.observe(validate(ad))
+
+        # Receive response or handle disconnect
+        answer = self.mturk_agent.act()
+        if 'task_data' not in answer:
+            print(self.mturk_agent.worker_id, '| DISCONNECT:', answer)
+            self.episodeDone = True
+            return None
+        response = answer['task_data']['form_responses'][0]['response']
+
+        print(self.mturk_agent.worker_id,
+              '| prompt_type:', prompt_type,
+              '| response:', response,
+              '| debate_mode:', 'TEST', self.cur_example_no,
+              '| duration:', round(answer['duration'] / 1000., 1),
+              '| qid:', 'TEST', self.cur_example_no)
+        return response
 
 
 class ContextEvaluationWorld(MTurkTaskWorld):
@@ -67,17 +186,16 @@ class ContextEvaluationWorld(MTurkTaskWorld):
         self.freq_changed_responses = None
 
         # Prompt type differences
-        self.evaluation_prompt_types = [opt['prompt_type']]
+        self.prompt_types = [opt['prompt_type']]
         self.accuracy_bonus_threshold = {
             'quote and question': .5,
-            'question': .4,
+            'question': .5,
         }
         self.median_sample_ms_reject_threshold = {
             'quote and question': 7000,
-            'question': 3500,
+            'question': 6000,
         }
 
-        print('# OPTIONS:', opt['num_options'])
         if opt['num_options'] > 4:
             raise('Invalid task_config[\'num_options\'] = ' + str(opt['num_options']))
         self.options = ['A', 'B', 'C', 'D'][:opt['num_options']]
@@ -117,8 +235,6 @@ class ContextEvaluationWorld(MTurkTaskWorld):
                     'answer': 'C'
                 },
             }
-        for example_no in self.test_questions.keys():
-            self.test_questions[example_no]['id'] = 'New passage quote and question (#' + str(example_no) + ')'
         assert self.num_test_turns == len(self.test_turns), 'self.num_test_turns != len(self.test_turns)'
 
         print(self.mturk_agent.worker_id,
@@ -131,10 +247,11 @@ class ContextEvaluationWorld(MTurkTaskWorld):
 
         # Verify work quality with a test question
         if self.cur_example_no in self.test_questions.keys():
-            ad = self.test_questions[self.cur_example_no]
-            response = self.prompt_and_receive_response(ad, 'quote and question', None)
-            if ad['answer'] != response:
-                reason = 'Test failed: Example ' + str(self.cur_example_no) + ' - Answered ' + response + ' not ' + (ad['answer'] if ad['answer'] is not None else ad['text'])
+            test_question = self.test_questions[self.cur_example_no]
+            response = self.prompt_and_receive_response(test_question['text'], 'quote and question', None)
+            if test_question['answer'] != response:
+                reason = 'Test failed: Example ' + str(self.cur_example_no) + ' - Answered ' + response + ' not ' + \
+                         (test_question['answer'] if test_question['answer'] is not None else test_question['text'])
                 # self.reject_reasons.append(reason)
             self.num_tested += 1
             return
@@ -210,13 +327,13 @@ class ContextEvaluationWorld(MTurkTaskWorld):
             prompt_text = '\n'.join([sample['question']] + sample['options'])
 
             # Question-only evaluation
-            if 'question' in self.evaluation_prompt_types:
+            if 'question' in self.prompt_types:
                 question_response = self.prompt_and_receive_response(prompt_text, 'question', sample)
                 if question_response is None:
                     return
 
             # Context+Question evaluation
-            if 'quote and question' in self.evaluation_prompt_types:
+            if 'quote and question' in self.prompt_types:
                 evaluation_sample = self.evaluation_data[sample['debate_mode']][sample['qid']]
                 sentences_chosen = '\n'.join([evaluation_sample['sentences_chosen'][0]])  # NB: Always picks first agent
                 for punct in {'.', '?', '!', ';', ','}:
@@ -226,7 +343,7 @@ class ContextEvaluationWorld(MTurkTaskWorld):
                 quote_and_question_response = self.prompt_and_receive_response(prompt_text, 'quote and question', sample)
                 if quote_and_question_response is None:
                     return
-                if 'question' in self.evaluation_prompt_types:
+                if 'question' in self.prompt_types:
                     self.num_changed_responses += (quote_and_question_response != question_response)
                 if sample['debate_mode'] is not None:
                     self.num_debate_mode_responses += (quote_and_question_response ==
@@ -312,7 +429,7 @@ class ContextEvaluationWorld(MTurkTaskWorld):
             return
 
         # Can review the work here to accept or reject it
-        if (('question' in self.evaluation_prompt_types) and ('quote and question' in self.evaluation_prompt_types) and
+        if (('question' in self.prompt_types) and ('quote and question' in self.prompt_types) and
                 (self.num_changed_responses is not None)):
             self.freq_changed_responses = (self.num_changed_responses / self.num_collected)
             if self.freq_changed_responses <= .2:  # Not reading closely
@@ -368,7 +485,7 @@ class ContextEvaluationWorld(MTurkTaskWorld):
                 print(self.mturk_agent.worker_id,
                       '| PAY_BONUS:', "self.accuracy['question'] =", self.accuracy['question'])
 
-            if (('question' in self.evaluation_prompt_types) and ('quote and question' in self.evaluation_prompt_types)
+            if (('question' in self.prompt_types) and ('quote and question' in self.prompt_types)
                     and (self.num_changed_responses is not None) and (self.freq_changed_responses >= .5)):
                 self.mturk_agent.pay_bonus(bonus_amount, 'Great job overall!')
                 print(self.mturk_agent.worker_id,

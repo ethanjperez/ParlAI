@@ -92,7 +92,7 @@ def main():
 
     # If we want to use the above onboard function, we can replace the below
     # with set_onboard_function(onboard_function=run_onboard) (onboard_function=None to skip)
-    mturk_manager.set_onboard_function(onboard_function=None)
+    mturk_manager.set_onboard_function(onboard_function=run_onboard)
 
     try:
         # Initialize run information

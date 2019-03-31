@@ -32,7 +32,7 @@ task_configs = {
         'max_hits_per_worker': 100,
     },
     'quote and question': {
-        'evaluation_data_dir': '../allennlp/eval/fasttext.o/dev',
+        'evaluation_data_dir': '../allennlp/eval/tfidf.o_q/dev',
         'num_conversations': 100,
         'option_splits': 4,
         'reward': 1.5,
@@ -48,7 +48,8 @@ task_configs = {
             <b>Questions in HIT</b>: 20<br>
             <b>Time</b>: 11 minutes<br>
             <b>Bonus</b>: $0.75 for over 50% accuracy<br>
-            <b>Payout</b>: Immediate<br><br>
+            <b>Payout</b>: Immediate<br>
+            <b>Qualifying</b>: Must pass 3 trial questions first<br><br>
             
             <b>------------------- EXAMPLE -------------------</b> <br><br>
             <b>Passage quote and question</b>:<br>
@@ -71,17 +72,18 @@ task_configs = {
         'reward': 1.0,
         'hit_description': 'Can you answer passage comprehension questions without the passage?',
         'task_description': """
-            <b>Your Goal</b>: See how well you can guess the answers to passage-comprehension exam questions, without the passage - just the question and answer options.
+            <b>Your Goal</b>: See how well you can answer passage-comprehension exam questions, without the passage - just the question and answer options.
             You\'ll get a bonus if you do well!<br><br>
             
-            <b>Our Goal</b>: We\'re trying to evaluate how well people can do on reading comprehension exams without reading the passage.<br><br>
+            <b>Our Goal</b>: We\'re trying to evaluate how well people can do on reading comprehension exams without reading the passage. Options can often be eliminated by common sense, general knowledge, or the question/option phrasing; if you read closely, you should do notably better than random guessing.<br><br>
             
             <font color="blue"><b>IMPORTANT</b></font>: Our setup inherently makes some questions nonsensical or impossible to answer. For these questions, just give your best guess! The task is meant to be fun. We also made the bonus requirement easier to account for the task.<br><br>
             
             <b>Questions in HIT</b>: 20<br>
             <b>Time</b>: 7 minutes<br>
-            <b>Bonus</b>: $0.50 for over 40% accuracy<br>
-            <b>Payout</b>: Immediate<br><br>
+            <b>Bonus</b>: $0.50 for over 50% accuracy<br>
+            <b>Payout</b>: Immediate<br>
+            <b>Qualifying</b>: Must pass 3 trial questions first<br><br>
             
             <b>------------------- EXAMPLE -------------------</b> <br><br>
             <b>Question</b>:<br>
