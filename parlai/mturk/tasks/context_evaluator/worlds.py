@@ -19,6 +19,7 @@ class ContextEvaluationOnboardWorld(MTurkOnboardWorld):
         self.mturk_agent = mturk_agent
         self.episodeDone = False
 
+        self.passed_test = None
         self.cur_example_no = 1
         self.options = ['A', 'B', 'C', 'D'][:opt['num_options']]
         self.prompt_types = [opt['prompt_type']]
@@ -30,7 +31,8 @@ class ContextEvaluationOnboardWorld(MTurkOnboardWorld):
                         'B. Purple and pink\n' +
                         'C. Green or yellow\n' +
                         'D. Plain white',
-                'answer': 'C'
+                'answer': 'C',
+                'qid': 'trial/0',
             },
             {
                 'text': 'The film Schindler\'s List also takes place during World War Two.\n\n' +
@@ -40,6 +42,7 @@ class ContextEvaluationOnboardWorld(MTurkOnboardWorld):
                         'C. They are both American movies.\n' +
                         'D. They both happen during World War Two.',
                 'answer': 'D',
+                'qid': 'trial/1',
             },
             {
                 'text': 'They are like sheep being led to the slaughterhouse.\n\n'
@@ -49,6 +52,7 @@ class ContextEvaluationOnboardWorld(MTurkOnboardWorld):
                         'C. At one time or another you probably did something you knew to be wrong.\n'
                         'D. It is a mistake to follow the "top" crowd blindly.',
                 'answer': 'D',
+                'qid': 'trial/2',
             },
             # {
             #     'text': '"We taught you this just last week!"\n\n' +
@@ -58,6 +62,7 @@ class ContextEvaluationOnboardWorld(MTurkOnboardWorld):
             #             'C. 41 - 22 = 18\n' +
             #             'D. 6 x 4 = 24',
             #     'answer': 'D'
+            #     'qid': 'sample/3',
             # },
         ]
         random.shuffle(self.test_questions)
@@ -67,7 +72,7 @@ class ContextEvaluationOnboardWorld(MTurkOnboardWorld):
             'episode_done': False,
             'id': 'System',
             'text': 'Welcome onboard! We\'ll first give you ' + str(len(self.test_questions)) + ' practice examples to help you understand the task. '
-                    'To qualify for our HIT, you\'ll need to answer all practice questions correct.',
+                    'To qualify for the HIT, you\'ll need to answer all practice questions correct.',
         }
         self.mturk_agent.observe(ad)
 
@@ -75,8 +80,10 @@ class ContextEvaluationOnboardWorld(MTurkOnboardWorld):
             # NB: Change self.prompt_type[0] if using multiple prompt_types
             response = self.prompt_and_receive_response(test_question['text'], self.prompt_types[0])
             if test_question['answer'] != response:
+                print(self.mturk_agent.worker_id, '| FAILED', test_question['qid'],
+                      '| Answered', response, 'not', test_question['answer'])
+                self.passed_test = False
                 self.mturk_agent.mturk_manager.soft_block_worker(self.mturk_agent.worker_id)
-                self.mturk_agent.set_hit_is_abandoned()  # NB: May not be the right thing to do
                 ad = {
                     'episode_done': False,
                     'id': 'System',
@@ -90,6 +97,7 @@ class ContextEvaluationOnboardWorld(MTurkOnboardWorld):
                     'text': 'Unfortunately, you did not qualify for our task at this time, but we hope to see you again soon!',
                 }
                 self.mturk_agent.observe(ad)
+                self.mturk_agent.set_hit_is_abandoned()  # NB: May not be the right thing to do
                 return
             ad = {
                 'episode_done': False,
@@ -99,6 +107,7 @@ class ContextEvaluationOnboardWorld(MTurkOnboardWorld):
             self.mturk_agent.observe(ad)
             self.cur_example_no += 1
 
+        self.passed_test = True
         self.episodeDone = True
         ad = {
             'episode_done': True,

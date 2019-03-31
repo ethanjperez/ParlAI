@@ -10,6 +10,7 @@ from parlai.mturk.core.mturk_manager import MTurkManager
 from parlai.mturk.core import shared_utils
 from parlai.mturk.tasks.context_evaluator.task_config import task_configs
 from pprint import pprint
+import datetime
 import os
 import importlib
 import json
@@ -67,6 +68,10 @@ def main():
             active_workers_per_incomplete_hit_by_split[(q_spl, o_spl)] = (
                     active_workers_by_split[(q_spl, o_spl)] / incomplete_hits_by_split[(q_spl, o_spl)])
 
+    # Track stats about how many people have passed onboarding
+    global num_passed_agents, num_total_agents
+    num_passed_agents, num_total_agents = 0, 0
+
     # Initialize a dataset agent, which we will get quote from
     task_class = getattr(importlib.import_module('parlai.tasks.race.agents'), 'IndexTeacher')
     task_opt = opt.copy()
@@ -87,6 +92,12 @@ def main():
         world = ContextEvaluationOnboardWorld(opt=opt, mturk_agent=worker)
         while not world.episode_done():
             world.parley()
+        if world.passed_test is not None:
+            global num_passed_agents
+            num_passed_agents = num_passed_agents + world.passed_test
+            global num_total_agents
+            num_total_agents += num_total_agents + 1
+            print('TEST PASS RATE:', num_passed_agents, '/', num_total_agents)
         world.shutdown()
         return world.prep_save_data([worker])
 
@@ -169,7 +180,7 @@ def main():
             print('incomplete_hits_by_split:', incomplete_hits_by_split)
             print('active_workers_per_incomplete_hit_by_split:', active_workers_per_incomplete_hit_by_split)
             if max(list(incomplete_hits_by_split.values())) <= 0:
-                print('********** COMPLETED HITS! **********')
+                print('********** COMPLETED HITS! **********', str(datetime.datetime.now()))
                 mturk_manager.completed_conversations = mturk_manager.num_conversations  # Signal no more HITs needed
 
             # Return the contents for saving
