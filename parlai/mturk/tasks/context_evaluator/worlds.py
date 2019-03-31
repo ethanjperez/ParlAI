@@ -235,7 +235,7 @@ class ContextEvaluationWorld(MTurkTaskWorld):
         if opt['num_options'] > 4:
             raise('Invalid task_config[\'num_options\'] = ' + str(opt['num_options']))
         self.options = ['A', 'B', 'C', 'D'][:opt['num_options']]
-        self.debate_mode_to_option = {'Ⅰ': 'A', 'Ⅱ': 'B', 'Ⅲ': 'C', 'Ⅳ': 'D'}
+        self.debate_mode_to_option = {'Ⅰ': 'A', 'Ⅱ': 'B', 'Ⅲ': 'C', 'Ⅳ': 'D', 'ⅰ': 'A', 'ⅱ': 'B', 'ⅲ': 'C', 'ⅳ': 'D'}
 
         random.seed(0)
         if evaluation_data:
@@ -245,6 +245,7 @@ class ContextEvaluationWorld(MTurkTaskWorld):
             possible_debate_modes.sort()
             self.sample_debate_modes = [possible_debate_modes[random.randint(0, len(possible_debate_modes) - 1) - self.option_split_no]
                                         for _ in range(self.max_collected)]
+            print(self.mturk_agent.worker_id, '| DEBATE MODES:', self.sample_debate_modes)
 
         self.num_test_turns = 0  # 2
         self.test_turns = []
