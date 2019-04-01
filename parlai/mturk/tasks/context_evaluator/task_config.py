@@ -32,7 +32,7 @@ task_configs = {
         'max_hits_per_worker': 100,
     },
     'quote and question': {
-        'evaluation_data_dir': '../allennlp/eval/tfidf.o/dev',
+        'evaluation_data_dir': '../allennlp/eval/race.ⅱ.m=sl-sents.i.lr=2e-5.bsz=12.n=1.x=0.5.c=concat/dev.num_passages=13',
         'num_conversations': 100,
         'option_splits': 4,
         'reward': 1.5,
