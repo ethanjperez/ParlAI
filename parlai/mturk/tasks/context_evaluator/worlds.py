@@ -224,7 +224,7 @@ class ContextEvaluationWorld(MTurkTaskWorld):
         # Prompt type differences
         self.prompt_types = [opt['prompt_type']]
         self.accuracy_bonus_threshold = {
-            'quote and question': 0.5745454545454546,
+            'quote and question': .55,
             'question': .45,
         }
         self.median_sample_ms_reject_threshold = {

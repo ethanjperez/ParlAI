@@ -32,7 +32,7 @@ task_configs = {
         'max_hits_per_worker': 100,
     },
     'quote and question': {
-        'evaluation_data_dir': '../allennlp/eval/race.ⅱ.m=sl.n=1.x=0.5.lr=5e-6.bsz=12.c=concat/dev.num_passages=13',
+        'evaluation_data_dir': '../allennlp/eval/tfidf.o/dev',
         'num_conversations': 100,
         'option_splits': 4,
         'reward': 1.5,
@@ -47,7 +47,7 @@ task_configs = {
             
             <b>Questions in HIT</b>: 20<br>
             <b>Time</b>: 11 minutes<br>
-            <b>Bonus</b>: $0.75 for exceeding average worker accuracy (~58%)<br>
+            <b>Bonus</b>: $0.75 for exceeding average worker accuracy (~55%)<br>
             <b>Payout</b>: Immediate<br>
             <b>Qualifying</b>: Must pass 3 trial questions first<br><br>
             
