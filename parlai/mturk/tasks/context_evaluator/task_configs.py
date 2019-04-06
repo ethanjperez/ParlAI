@@ -18,11 +18,13 @@ task_configs = {
     },
     'race': {
         'datatype': 'dev.num_passages=13',
+        'num_conversations': 100,
         'num_options': 4,
         'unique_qual_name': 'tfidf4',
     },
     'dream': {
         'datatype': 'test.num_questions=100',
+        'num_conversations': 75,
         'num_options': 3,
         'unique_qual_name': 'dream',
     },
@@ -40,7 +42,6 @@ task_configs = {
     },
     'quote and question': {
         'evaluation_data_dir': '../allennlp/eval/dream/tfidf.o/test',
-        'num_conversations': 100,
         'reward': 1.5,
         'hit_description': 'Can you answer passage comprehension questions using just a quote?',
         'task_description': """
