@@ -229,7 +229,7 @@ class ContextEvaluationWorld(MTurkTaskWorld):
         self.accuracy_bonus_threshold = {
             'dream': {
                 'quote and question': .6,
-                'question': .51,
+                'question': .45,
             },
             'race': {
                 'quote and question': .55,
@@ -323,36 +323,12 @@ class ContextEvaluationWorld(MTurkTaskWorld):
             self.num_tested += 1
             return
         elif self.cur_example_no > (self.max_collected + self.num_test_turns):
-            ad = {
-                'episode_done': False,
-                'id': 'System',
-                'text': 'All done!',
-                'task_data': {"respond_with_form": None}
-            }
-            for prompt_type, num_correct_for_prompt_type in self.num_correct_on_labeled.items():
-                # Show accuracy
-                prompt_type_accuracy = int(round((100. * num_correct_for_prompt_type) /
-                                                 self.num_collected_on_labeled[prompt_type]))
-                ad['text'] += ' You got ' + str(prompt_type_accuracy) + '% of questions right'
-                if prompt_type == 'question':
-                    ad['text'] += ' with just the questions and options!'
-                elif prompt_type == 'quote and question':
-                    ad['text'] += ' with just a short quote from the passage!'
-                else:
-                    ad['text'] += '!'
-
-                # Congratulate if they beat random
-                random_accuracy = int(round(100. / len(self.options)))
-                if prompt_type_accuracy > (random_accuracy + 10):
-                    ad['text'] += ' That\'s ' + str(prompt_type_accuracy - random_accuracy) + '% better than random guessing. Great work!'
-            self.mturk_agent.observe(ad)
-
             if 'quote and question' in self.prompt_types:
                 # Get quote rating
                 ad = {
                     'episode_done': False,
                     'id': 'System',
-                    'text': 'How useful were the provided passage quotes in answering questions?',
+                    'text': 'All done! How useful were the provided passage quotes in answering questions?',
                     'task_data': {
                         'respond_with_form': [
                             {
@@ -381,6 +357,30 @@ class ContextEvaluationWorld(MTurkTaskWorld):
                 print(self.mturk_agent.worker_id,
                       '| quote_rating:', self.quote_rating,
                       '| quote_description:', self.quote_description)
+
+            ad = {
+                'episode_done': False,
+                'id': 'System',
+                'text': 'Thanks!',
+                'task_data': {"respond_with_form": None}
+            }
+            for prompt_type, num_correct_for_prompt_type in self.num_correct_on_labeled.items():
+                # Show accuracy
+                prompt_type_accuracy = int(round((100. * num_correct_for_prompt_type) /
+                                                 self.num_collected_on_labeled[prompt_type]))
+                ad['text'] += ' You got ' + str(prompt_type_accuracy) + '% of questions right'
+                if prompt_type == 'question':
+                    ad['text'] += ' with just the questions and options!'
+                elif prompt_type == 'quote and question':
+                    ad['text'] += ' with just a short quote from the passage!'
+                else:
+                    ad['text'] += '!'
+
+                # Congratulate if they beat random
+                random_accuracy = int(round(100. / len(self.options)))
+                if prompt_type_accuracy > (random_accuracy + 10):
+                    ad['text'] += ' That\'s ' + str(prompt_type_accuracy - random_accuracy) + '% better than random guessing. Great work!'
+            self.mturk_agent.observe(ad)
 
             # Net Promoter Score
             ad = {
