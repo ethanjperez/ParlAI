@@ -8,7 +8,7 @@ from parlai.mturk.tasks.context_evaluator.worlds import \
     ContextEvaluationOnboardWorld, ContextEvaluationWorld
 from parlai.mturk.core.mturk_manager import MTurkManager
 from parlai.mturk.core import shared_utils
-from parlai.mturk.tasks.context_evaluator.task_config import task_configs
+from parlai.mturk.tasks.context_evaluator.task_configs import task_configs
 from pprint import pprint
 import datetime
 import os
@@ -39,13 +39,9 @@ def main():
 
     # Append the contents of task_config.py to the configuration
     opt.update(task_configs['general'])
-    if opt['prompt_type'] not in {'question', 'quote and question'}:
-        raise NotImplementedError('Not implemented prompt_type \"' + str(opt['prompt_type']), '\"')
+    opt.update(task_configs[opt['dataset']])
+    opt.update(task_configs['sandbox' if opt['is_sandbox'] else 'live'])
     opt.update(task_configs[opt['prompt_type']])
-    if opt['is_sandbox']:
-        opt.update(task_configs['sandbox'])
-    else:
-        opt.update(task_configs['live'])
     pprint(opt)
 
     # Load data to evaluate
@@ -61,10 +57,11 @@ def main():
     # The values in these maps should always be non-negative
     active_workers_per_incomplete_hit_by_split, active_workers_by_split, incomplete_hits_by_split = {}, {}, {}
     for q_spl in range(opt['question_splits']):
-        for o_spl in range(opt['option_splits']):
+        option_splits = 1 if opt['prompt_type'] == 'question' else opt['num_options']
+        for o_spl in range(option_splits):
             active_workers_by_split[(q_spl, o_spl)] = 0
             incomplete_hits_by_split[(q_spl, o_spl)] = opt['num_conversations'] / (
-                    opt['question_splits'] * opt['option_splits'])
+                    opt['question_splits'] * option_splits)
             active_workers_per_incomplete_hit_by_split[(q_spl, o_spl)] = (
                     active_workers_by_split[(q_spl, o_spl)] / incomplete_hits_by_split[(q_spl, o_spl)])
 
@@ -73,7 +70,7 @@ def main():
     num_passed_agents, num_total_agents = 0, 0
 
     # Initialize a dataset agent, which we will get quote from
-    task_class = getattr(importlib.import_module('parlai.tasks.race.agents'), 'IndexTeacher')
+    task_class = getattr(importlib.import_module('parlai.tasks.' + opt['dataset'] + '.agents'), 'IndexTeacher')
     task_opt = opt.copy()
 
     # Instantiate an MTurkManager with the given options and a maximum number

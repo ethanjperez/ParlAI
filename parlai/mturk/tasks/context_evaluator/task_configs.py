@@ -14,16 +14,23 @@ task_configs = {
         'hit_title': 'Guess the answer!',  # Passage comprehension [with just quotes / without the passage]
         'hit_keywords': 'reading,question,answer',
         'mturk_agent_id': 'Guesser',
-        'datatype': 'dev.num_passages=13',
         'question_splits': 5,  # max Q's/passage in 'datatype' field directory
+    },
+    'race': {
+        'datatype': 'dev.num_passages=13',
         'num_options': 4,
+        'unique_qual_name': 'tfidf4',
+    },
+    'dream': {
+        'datatype': 'test.num_questions=100',
+        'num_options': 3,
+        'unique_qual_name': 'dream',
     },
     'live': {
         'allowed_conversations': 1,
         'disconnect_qualification': 'disconnect_tfidf',
         'hobby': True,
         'max_hits_per_worker': 1,
-        'unique_qual_name': 'tfidf4',
         'unique_worker': True,
     },
     'sandbox': {
@@ -32,9 +39,8 @@ task_configs = {
         'max_hits_per_worker': 100,
     },
     'quote and question': {
-        'evaluation_data_dir': '../allennlp/eval/race.ⅱ.m=sl-sents.i.lr=2e-5.bsz=12.n=1.x=0.5.c=concat/dev.num_passages=13',
+        'evaluation_data_dir': '../allennlp/eval/dream/tfidf.o/test',
         'num_conversations': 100,
-        'option_splits': 4,
         'reward': 1.5,
         'hit_description': 'Can you answer passage comprehension questions using just a quote?',
         'task_description': """
@@ -43,13 +49,13 @@ task_configs = {
             
             <b>Our Goal</b>: We\'re trying to evaluate how important various passage sentences are for answering each question.<br><br>
             
-            <font color="blue"><b>IMPORTANT</b></font>: Our setup inherently makes some questions nonsensical or impossible to answer. For these questions, just give your best guess! The task is meant to be fun.<br><br>
+            <font color="blue"><b>IMPORTANT</b></font>: Our setup inherently makes many questions nonsensical or impossible to answer. For these questions, just give your best guess! The task is meant to be fun.<br><br>
             
             <b>Questions in HIT</b>: 20<br>
             <b>Time</b>: 11 minutes<br>
-            <b>Bonus</b>: $0.75 for exceeding average worker accuracy (~55%)<br>
+            <b>Bonus</b>: $0.75 for exceeding average worker accuracy<br>
             <b>Payout</b>: Immediate<br>
-            <b>Qualifying</b>: Must pass 3 trial questions first<br><br>
+            <b>Qualifying</b>: Must pass 3 trial questions first. If you pass the qualifier but don\'t try on the real HIT, your work may be rejected.<br><br>
             
             <b>------------------- EXAMPLE -------------------</b> <br><br>
             <b>Passage quote and question</b>:<br>
@@ -69,7 +75,6 @@ task_configs = {
     'question': {
         'evaluation_data_dir': None,
         'num_conversations': 25,
-        'option_splits': 1,
         'reward': 1.0,
         'hit_description': 'Can you answer passage comprehension questions without the passage?',
         'task_description': """
@@ -82,9 +87,9 @@ task_configs = {
             
             <b>Questions in HIT</b>: 20<br>
             <b>Time</b>: 7 minutes<br>
-            <b>Bonus</b>: $0.50 for exceeding average worker accuracy (~45%)<br>
+            <b>Bonus</b>: $0.50 for exceeding average worker accuracy<br>
             <b>Payout</b>: Immediate<br>
-            <b>Qualifying</b>: Must pass 3 trial questions first<br><br>
+            <b>Qualifying</b>: Must pass 3 trial questions first. If you pass the qualifier but don\'t try on the real HIT, your work may be rejected.<br><br>
             
             <b>------------------- EXAMPLE -------------------</b> <br><br>
             <b>Question</b>:<br>

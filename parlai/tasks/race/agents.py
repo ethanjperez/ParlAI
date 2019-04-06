@@ -24,6 +24,7 @@ class IndexTeacher(FixedDialogTeacher):
     def __init__(self, opt, shared=None):
         build(opt)
         super().__init__(opt, shared)
+        self.id = 'race'
         self._letter_to_answer_idx = {'A': 0, 'B': 1, 'C': 2, 'D': 3}
         self._answer_idx_to_letter = {0: 'A', 1: 'B', 2: 'C', 3: 'D'}
 
@@ -34,7 +35,6 @@ class IndexTeacher(FixedDialogTeacher):
         )
         self.data = self._setup_data(datapath, opt['question_split_no'], opt['question_splits'])
 
-        self.id = 'race'
         self.reset()
 
     def num_examples(self):
@@ -73,7 +73,7 @@ class IndexTeacher(FixedDialogTeacher):
                     answer_index = self._letter_to_answer_idx[art_data["answers"][q]]
                     qid = self._filepath_to_id(art_file, q)
                     self.examples.append({
-                        'id': 'race',
+                        'id': self.id,
                         'text': '\n'.join([passage_text + '\n', question_text + '\n'] + options_text),
                         'labels': options_text[answer_index],
                         'episode_done': True,

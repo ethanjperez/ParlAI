@@ -21,7 +21,7 @@ class ContextEvaluationOnboardWorld(MTurkOnboardWorld):
 
         self.passed_test = None
         self.cur_example_no = 1
-        self.options = ['A', 'B', 'C', 'D'][:opt['num_options']]
+        self.options = ['A', 'B', 'C', 'D']  # Always use all 4 answer-options for practice questions.
         self.prompt_types = [opt['prompt_type']]
         self.test_questions = {
             'question': [
@@ -196,6 +196,7 @@ class ContextEvaluationWorld(MTurkTaskWorld):
         self.is_sandbox = opt['is_sandbox']
         self.question_split_no = opt['question_split_no']
         self.option_split_no = opt['option_split_no']
+        self.dataset = opt['dataset']
         self.task = task
         self.mturk_agent = mturk_agent
         self.evaluation_data = evaluation_data
@@ -216,6 +217,8 @@ class ContextEvaluationWorld(MTurkTaskWorld):
         self.durations = {}
         self.reject_reasons = []
         self.block_reasons = []
+        self.quote_rating = None
+        self.quote_description = None
         self.task_rating = None
         self.feedback = None
         self.hit_done = False
@@ -224,18 +227,45 @@ class ContextEvaluationWorld(MTurkTaskWorld):
         # Prompt type differences
         self.prompt_types = [opt['prompt_type']]
         self.accuracy_bonus_threshold = {
-            'quote and question': .55,
-            'question': .45,
-        }
+            'dream': {
+                'quote and question': .6,
+                'question': .51,
+            },
+            'race': {
+                'quote and question': .55,
+                'question': .45,
+            },
+        }[self.dataset]
         self.median_sample_ms_reject_threshold = {
-            'quote and question': 7000,
-            'question': 6000,
-        }
+            'dream': {
+                'quote and question': 4000,
+                'question': 3000,
+            },
+            'race': {
+                'quote and question': 7000,
+                'question': 6000,
+            },
+        }[self.dataset]
 
         if opt['num_options'] > 4:
             raise('Invalid task_config[\'num_options\'] = ' + str(opt['num_options']))
         self.options = ['A', 'B', 'C', 'D'][:opt['num_options']]
-        self.debate_mode_to_option = {'Ⅰ': 'A', 'Ⅱ': 'B', 'Ⅲ': 'C', 'Ⅳ': 'D', 'ⅰ': 'A', 'ⅱ': 'B', 'ⅲ': 'C', 'ⅳ': 'D'}
+        self.debate_mode_to_option = {'Ⅰ': 'A', 'Ⅱ': 'B', 'Ⅲ': 'C', 'Ⅳ': 'D', 'ⅰ': 'A', 'ⅱ': 'B', 'ⅲ': 'C', 'ⅳ': 'D', None: None}
+
+        self.dream_speaker_to_name = {
+            'M': 'Man',
+            'M1': 'Man 1',
+            'M2': 'Man 2',
+            'F': 'Woman',
+            'F1': 'Woman 1',
+            'F2': 'Woman 2',
+            'W': 'Woman',
+            'W1': 'Woman 1',
+            'W2': 'Woman 2',
+            'A': 'Speaker A',
+            'B': 'Speaker B',
+        }
+
 
         random.seed(0)
         if evaluation_data:
@@ -317,6 +347,42 @@ class ContextEvaluationWorld(MTurkTaskWorld):
                     ad['text'] += ' That\'s ' + str(prompt_type_accuracy - random_accuracy) + '% better than random guessing. Great work!'
             self.mturk_agent.observe(ad)
 
+            if 'quote and question' in self.prompt_types:
+                # Get quote rating
+                ad = {
+                    'episode_done': False,
+                    'id': 'System',
+                    'text': 'How useful were the provided passage quotes in answering questions?',
+                    'task_data': {
+                        'respond_with_form': [
+                            {
+                                'type': 'choices',
+                                'question': 'On a scale of 0-10',
+                                'choices': [i for i in range(0, 11)]
+                            }
+                        ]
+                    }
+                }
+                self.mturk_agent.observe(ad)
+                quote_rating_message = self.mturk_agent.act()  # Receive task rating
+                self.quote_rating = quote_rating_message['task_data']['form_responses'][0]['response']
+
+                # Get quote description
+                ad = {
+                    'episode_done': False,
+                    'id': 'System',
+                    'text': 'How would you describe the provided passage quotes?',
+                    'task_data': {"respond_with_form": None},
+                }
+                self.mturk_agent.observe(ad)
+                quote_description_message = self.mturk_agent.act()
+                self.quote_description = quote_description_message['text']
+
+                print(self.mturk_agent.worker_id,
+                      '| quote_rating:', self.quote_rating,
+                      '| quote_description:', self.quote_description)
+
+            # Net Promoter Score
             ad = {
                 'episode_done': False,
                 'id': 'System',
@@ -372,9 +438,19 @@ class ContextEvaluationWorld(MTurkTaskWorld):
             # Context+Question evaluation
             if 'quote and question' in self.prompt_types:
                 evaluation_sample = self.evaluation_data[sample['debate_mode']][sample['qid']]
-                sentences_chosen = '\n'.join([evaluation_sample['sentences_chosen'][0]])  # NB: Always picks first agent
+                sentences_chosen = [evaluation_sample['sentences_chosen'][0]]  # NB: Always picks first agent
+
+                # Format and preprocess selected sentences
+                if self.dataset == 'dream':
+                    for i in range(len(sentences_chosen)):
+                        for speaker, name in self.dream_speaker_to_name.items():
+                            if sentences_chosen[i].startswith(speaker + ': '):
+                                sentences_chosen[i] = sentences_chosen[i].replace(speaker, name, 1)
+                                break
+                sentences_chosen = '\n'.join(sentences_chosen)
                 for punct in {'.', '?', '!', ';', ','}:
                     sentences_chosen = sentences_chosen.replace(' ' + punct, punct)
+
                 prompt_text = sentences_chosen + '\n\n' + prompt_text
                 sample['sentences_chosen'] = sentences_chosen
                 quote_and_question_response = self.prompt_and_receive_response(prompt_text, 'quote and question', sample)
@@ -423,7 +499,7 @@ class ContextEvaluationWorld(MTurkTaskWorld):
 
         if sample is not None:
             # Evaluate work on non-qualifying questions
-            if 'eval_labels' in sample:  # NB: Check self.mturk_agent.metrics
+            if 'eval_labels' in sample:
                 self.num_correct_on_labeled[prompt_type] = self.num_correct_on_labeled.get(prompt_type, 0)
                 self.num_correct_on_labeled[prompt_type] += (response == sample['eval_labels'][0])
                 self.num_collected_on_labeled[prompt_type] = self.num_collected_on_labeled.get(prompt_type, 0)
@@ -502,12 +578,12 @@ class ContextEvaluationWorld(MTurkTaskWorld):
               '| block_reasons:', self.block_reasons,
               '| reject_reasons:', self.reject_reasons)
         if len(self.block_reasons) > 0:
-            self.mturk_agent.reject_work('poor performance')
+            self.mturk_agent.reject_work('effort')
             if not self.is_sandbox:
-                self.mturk_agent.block_worker('poor performance')
+                self.mturk_agent.block_worker('effort')
         elif len(self.reject_reasons):
             # TODO: Add soft block: mturk_manager.soft_block_worker(self.mturk_agent.worker_id) after setting --block-qualification
-            self.mturk_agent.reject_work('poor performance')
+            self.mturk_agent.reject_work('effort')
         else:
             self.mturk_agent.approve_work()
             bonus_amount = round(.5 * self.reward, 2)
@@ -537,6 +613,8 @@ class ContextEvaluationWorld(MTurkTaskWorld):
             'data': self.data,
             'worker_id': self.mturk_agent.worker_id,
             'assignment_id': self.mturk_agent.assignment_id,
+            'quote_rating': self.quote_rating,
+            'quote_description': self.quote_description,
             'task_rating': self.task_rating,
             'feedback': self.feedback,
             'reject_reasons': self.reject_reasons,

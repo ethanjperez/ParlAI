@@ -276,8 +276,11 @@ class ParlaiParser(argparse.ArgumentParser):
     def add_context_evaluation_args(self):
         evaluation = self.add_argument_group('Context Evaluation')
         evaluation.add_argument(
-            '--prompt-type', default='quote and question', type=str,
-            help='Which type of prompt to provide to workers (e.g., \"question\", \"quote and question\", etc.)')
+            '--prompt-type', default='quote and question', type=str, choices=['quote and question', 'question'],
+            help='Which type of prompt to provide to workers')
+        evaluation.add_argument(
+            '--dataset', default='race', type=str, choices=['race', 'dream'],
+            help='Which dataset to evaluate with')
 
     def add_messenger_args(self):
         messenger = self.add_argument_group('Facebook Messenger')
