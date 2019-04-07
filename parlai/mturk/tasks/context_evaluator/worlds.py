@@ -17,6 +17,7 @@ class ContextEvaluationOnboardWorld(MTurkOnboardWorld):
     def __init__(self, opt, mturk_agent):
         # MTurkOnboardWorld init
         self.mturk_agent = mturk_agent
+        print(self.mturk_agent.worker_id, '| INIT ONBOARD WORLD')
         self.episodeDone = False
 
         self.passed_test = None
@@ -217,6 +218,7 @@ class ContextEvaluationWorld(MTurkTaskWorld):
         self.durations = {}
         self.reject_reasons = []
         self.block_reasons = []
+        self.bonus_reasons = []
         self.quote_rating = None
         self.quote_description = None
         self.task_rating = None
@@ -233,12 +235,12 @@ class ContextEvaluationWorld(MTurkTaskWorld):
             },
             'race': {
                 'quote and question': .55,
-                'question': .45,
+                'question': .47,
             },
         }[self.dataset]
         self.median_sample_ms_reject_threshold = {
             'dream': {
-                'quote and question': 6000,
+                'quote and question': 4500,
                 'question': 4000,
             },
             'race': {
@@ -246,6 +248,10 @@ class ContextEvaluationWorld(MTurkTaskWorld):
                 'question': 6000,
             },
         }[self.dataset]
+        self.response_freq_reject_threshold = {
+            3: .8,
+            4: .7,
+        }[opt['num_options']]
 
         if opt['num_options'] > 4:
             raise('Invalid task_config[\'num_options\'] = ' + str(opt['num_options']))
@@ -265,7 +271,6 @@ class ContextEvaluationWorld(MTurkTaskWorld):
             'A': 'Speaker A',
             'B': 'Speaker B',
         }
-
 
         random.seed(0)
         if evaluation_data:
@@ -569,41 +574,39 @@ class ContextEvaluationWorld(MTurkTaskWorld):
             for answer, count in answer_to_count.items():
                 freq = count / self.num_collected
                 reason = answer + ' freq = ' + str(freq)
-                if freq >= .7:
+                if freq >= self.response_freq_reject_threshold:
                     self.reject_reasons.append(reason)
-                    if freq >= .85:
+                    if freq >= ((1 + self.response_freq_reject_threshold) / 2.):
                         self.block_reasons.append(reason)
+
+        # Bonus for above-average accuracy
+        for prompt_type, prompt_type_acc in self.accuracy:
+            if prompt_type_acc > self.accuracy_bonus_threshold[prompt_type]:
+                self.bonus_reasons.append(prompt_type + ' accuracy = ' + str(prompt_type_acc))
+
+        # Bonus for changing your answer based on context
+        if (('question' in self.prompt_types) and ('quote and question' in self.prompt_types)
+                and (self.num_changed_responses is not None) and (self.freq_changed_responses >= .5)):
+            self.bonus_reasons.append('freq_changed_responses = ' + str(self.freq_changed_responses))
 
         print(self.mturk_agent.worker_id, 'Done! | num_debate_mode_responses:', self.num_debate_mode_responses, '/', self.num_collected,
               '| block_reasons:', self.block_reasons,
-              '| reject_reasons:', self.reject_reasons)
+              '| reject_reasons:', self.reject_reasons,
+              '| bonus_reasons:', self.bonus_reasons)
+
+        if len(self.bonus_reasons) > 0:  # Meeting bonus condition overrides rejection/blocking
+            self.mturk_agent.approve_work()
+            bonus_amount = round(.5 * self.reward, 2)
+            self.mturk_agent.pay_bonus(bonus_amount, 'Great accuracy!')
         if len(self.block_reasons) > 0:
             self.mturk_agent.reject_work('effort')
             if not self.is_sandbox:
-                self.mturk_agent.block_worker('effort')
+                self.mturk_agent.mturk_manager.soft_block_worker(self.mturk_agent.worker_id)
+                # self.mturk_agent.block_worker('effort')
         elif len(self.reject_reasons):
-            # TODO: Add soft block: mturk_manager.soft_block_worker(self.mturk_agent.worker_id) after setting --block-qualification
             self.mturk_agent.reject_work('effort')
         else:
             self.mturk_agent.approve_work()
-            bonus_amount = round(.5 * self.reward, 2)
-
-            if ('quote and question' in self.accuracy) and (self.accuracy['quote and question'] >= self.accuracy_bonus_threshold['quote and question']):
-                self.mturk_agent.pay_bonus(bonus_amount, 'Great accuracy!')
-                print(self.mturk_agent.worker_id,
-                      '| PAY_BONUS:', "self.accuracy['quote and question'] =", self.accuracy['quote and question'])
-
-            if ('question' in self.accuracy) and (self.accuracy['question'] >= self.accuracy_bonus_threshold['question']):
-                # Bonus if you're decently better than random, even with just question+options -only
-                self.mturk_agent.pay_bonus(bonus_amount, 'Great accuracy!')
-                print(self.mturk_agent.worker_id,
-                      '| PAY_BONUS:', "self.accuracy['question'] =", self.accuracy['question'])
-
-            if (('question' in self.prompt_types) and ('quote and question' in self.prompt_types)
-                    and (self.num_changed_responses is not None) and (self.freq_changed_responses >= .5)):
-                self.mturk_agent.pay_bonus(bonus_amount, 'Great job overall!')
-                print(self.mturk_agent.worker_id,
-                      '| PAY_BONUS:', "freq_changed_responses =", self.freq_changed_responses)
 
     def get_custom_task_data(self):
         # brings important data together for the task, to later be used for
@@ -619,6 +622,7 @@ class ContextEvaluationWorld(MTurkTaskWorld):
             'feedback': self.feedback,
             'reject_reasons': self.reject_reasons,
             'block_reasons': self.block_reasons,
+            'bonus_reasons': self.bonus_reasons,
             'hit_done': self.hit_done,
             'accuracy': self.accuracy,
             'question_split_no': self.question_split_no,

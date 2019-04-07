@@ -6,6 +6,16 @@ srun --pty --mem=20000 -t 1-23:58 bash
 export PYTHONPATH='.'
 python parlai/mturk/tasks/context_evaluator/run.py --live --dataset dream
 
+# Bonus workers (local)
+conda activate parlai2
 python parlai/mturk/core/scripts/bonus_workers.py --hit-id
 
+# Reverse rejections
+conda activate parlai2
+python
+from parlai.mturk.core.mturk_manager import MTurkManager
+manager = MTurkManager.make_taskless_instance()
+manager.approve_work('', override_rejection=True)
+
+# Copy remote -> local eval files
 rsync -rav -e ssh --include '*/' ejp416@access.cims.nyu.edu:~/research/ParlAI/parlai/mturk/core/run_data/live/ ~/research/ParlAI/parlai/mturk/core/run_data/live

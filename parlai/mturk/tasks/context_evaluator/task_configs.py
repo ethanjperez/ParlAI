@@ -30,7 +30,7 @@ task_configs = {
     },
     'live': {
         'allowed_conversations': 1,
-        'disconnect_qualification': 'disconnect_tfidf',
+        # 'disconnect_qualification': 'disconnect_tfidf',
         'hobby': True,
         'max_hits_per_worker': 1,
         'unique_worker': True,
@@ -41,7 +41,7 @@ task_configs = {
         'max_hits_per_worker': 100,
     },
     'quote and question': {
-        'evaluation_data_dir': '../allennlp/eval/dream/tfidf.o_q/test',
+        'evaluation_data_dir': '../allennlp/eval/dream/fasttext.o/test',
         'reward': 1.12,  # RACE: 1.5, 11m, .75 bonus
         'hit_description': 'Can you answer passage comprehension questions using just a quote?',
         'task_description': """
@@ -56,7 +56,7 @@ task_configs = {
             <b>Time</b>: 8 minutes<br>
             <b>Bonus</b>: $0.56 for exceeding average worker accuracy<br>
             <b>Payout</b>: Immediate<br>
-            <b>Qualifying</b>: Must pass 3 trial questions first. If you pass the qualifier but don\'t try on the real HIT, your work may be rejected.<br><br>
+            <b>Qualifying</b>: Must pass 3 trial questions first. We have the right to block or reject work for workers who pass the qualifier but provide spam on the real HIT.<br><br>
             
             <b>------------------- EXAMPLE -------------------</b> <br><br>
             <b>Passage quote and question</b>:<br>
@@ -90,7 +90,7 @@ task_configs = {
             <b>Time</b>: 7 minutes<br>
             <b>Bonus</b>: $0.50 for exceeding average worker accuracy<br>
             <b>Payout</b>: Immediate<br>
-            <b>Qualifying</b>: Must pass 3 trial questions first. If you pass the qualifier but don\'t try on the real HIT, your work may be rejected.<br><br>
+            <b>Qualifying</b>: Must pass 3 trial questions first. We have the right to block or reject work for workers who pass the qualifier but provide spam on the real HIT.<br><br>
             
             <b>------------------- EXAMPLE -------------------</b> <br><br>
             <b>Question</b>:<br>
