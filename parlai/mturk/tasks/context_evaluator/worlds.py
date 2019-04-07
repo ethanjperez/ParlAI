@@ -228,8 +228,8 @@ class ContextEvaluationWorld(MTurkTaskWorld):
         self.prompt_types = [opt['prompt_type']]
         self.accuracy_bonus_threshold = {
             'dream': {
-                'quote and question': .6,
-                'question': .45,
+                'quote and question': .65,  # Median: .6
+                'question': .5,  # Median: .45
             },
             'race': {
                 'quote and question': .55,
@@ -238,8 +238,8 @@ class ContextEvaluationWorld(MTurkTaskWorld):
         }[self.dataset]
         self.median_sample_ms_reject_threshold = {
             'dream': {
-                'quote and question': 4000,
-                'question': 3000,
+                'quote and question': 6000,
+                'question': 4000,
             },
             'race': {
                 'quote and question': 7000,
