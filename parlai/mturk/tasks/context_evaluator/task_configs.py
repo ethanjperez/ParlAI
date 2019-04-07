@@ -42,7 +42,7 @@ task_configs = {
     },
     'quote and question': {
         'evaluation_data_dir': '../allennlp/eval/dream/tfidf.o_q/test',
-        'reward': 1.5,
+        'reward': 1.12,  # RACE: 1.5, 11m, .75 bonus
         'hit_description': 'Can you answer passage comprehension questions using just a quote?',
         'task_description': """
             <b>Your Goal</b>: See how well you can guess the answers to passage-comprehension exam questions, given just a quote from the passage.
@@ -53,8 +53,8 @@ task_configs = {
             <font color="blue"><b>IMPORTANT</b></font>: Our setup inherently makes many questions nonsensical or impossible to answer. For these questions, just give your best guess! The task is meant to be fun.<br><br>
             
             <b>Questions in HIT</b>: 20<br>
-            <b>Time</b>: 11 minutes<br>
-            <b>Bonus</b>: $0.75 for exceeding average worker accuracy<br>
+            <b>Time</b>: 8 minutes<br>
+            <b>Bonus</b>: $0.56 for exceeding average worker accuracy<br>
             <b>Payout</b>: Immediate<br>
             <b>Qualifying</b>: Must pass 3 trial questions first. If you pass the qualifier but don\'t try on the real HIT, your work may be rejected.<br><br>
             
@@ -76,7 +76,7 @@ task_configs = {
     'question': {
         'evaluation_data_dir': None,
         'num_conversations': 25,
-        'reward': 1.0,
+        'reward': 1.0,  # DREAM: .76
         'hit_description': 'Can you answer passage comprehension questions without the passage?',
         'task_description': """
             <b>Your Goal</b>: See how well you can answer passage-comprehension exam questions, without the passage - just the question and answer options.
