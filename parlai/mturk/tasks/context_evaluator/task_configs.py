@@ -41,7 +41,7 @@ task_configs = {
         'max_hits_per_worker': 100,
     },
     'quote and question': {
-        'evaluation_data_dir': '../allennlp/eval/dream/fasttext.o/test',
+        'evaluation_data_dir': '../allennlp/eval/dream/oracle/test',
         'reward': 1.12,  # RACE: 1.5, 11m, .75 bonus
         'hit_description': 'Can you answer passage comprehension questions using just a quote?',
         'task_description': """
@@ -56,7 +56,7 @@ task_configs = {
             <b>Time</b>: 8 minutes<br>
             <b>Bonus</b>: $0.56 for exceeding average worker accuracy<br>
             <b>Payout</b>: Immediate<br>
-            <b>Qualifying</b>: Must pass 3 trial questions first. We have the right to block or reject work for workers who pass the qualifier but provide spam on the real HIT.<br><br>
+            <b>Qualifying</b>: Must pass 3 trial questions first. We have the right to reject work for workers who pass the qualifier but provide spam on the real HIT.<br><br>
             
             <b>------------------- EXAMPLE -------------------</b> <br><br>
             <b>Passage quote and question</b>:<br>
@@ -76,7 +76,7 @@ task_configs = {
     'question': {
         'evaluation_data_dir': None,
         'num_conversations': 25,
-        'reward': 1.0,  # DREAM: .76
+        'reward': 1.0,  # DREAM: .76, 5 min, .37 bonus
         'hit_description': 'Can you answer passage comprehension questions without the passage?',
         'task_description': """
             <b>Your Goal</b>: See how well you can answer passage-comprehension exam questions, without the passage - just the question and answer options.
@@ -90,7 +90,7 @@ task_configs = {
             <b>Time</b>: 7 minutes<br>
             <b>Bonus</b>: $0.50 for exceeding average worker accuracy<br>
             <b>Payout</b>: Immediate<br>
-            <b>Qualifying</b>: Must pass 3 trial questions first. We have the right to block or reject work for workers who pass the qualifier but provide spam on the real HIT.<br><br>
+            <b>Qualifying</b>: Must pass 3 trial questions first. We have the right to reject work for workers who pass the qualifier but provide spam on the real HIT.<br><br>
             
             <b>------------------- EXAMPLE -------------------</b> <br><br>
             <b>Question</b>:<br>

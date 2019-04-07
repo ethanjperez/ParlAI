@@ -172,7 +172,7 @@ class ContextEvaluationOnboardWorld(MTurkOnboardWorld):
         if 'task_data' not in response_message:
             print(self.mturk_agent.worker_id, '| DISCONNECT:', response_message)
             self.episodeDone = True
-            return None
+            return
         response = response_message['task_data']['form_responses'][0]['response']
 
         print(self.mturk_agent.worker_id,
@@ -346,6 +346,10 @@ class ContextEvaluationWorld(MTurkTaskWorld):
                 }
                 self.mturk_agent.observe(ad)
                 quote_rating_message = self.mturk_agent.act()  # Receive task rating
+                if 'task_data' not in quote_rating_message:
+                    print(self.mturk_agent.worker_id, '| DISCONNECT:', quote_rating_message)
+                    self.episodeDone = True
+                    return
                 self.quote_rating = quote_rating_message['task_data']['form_responses'][0]['response']
 
                 # Get quote description
@@ -357,6 +361,10 @@ class ContextEvaluationWorld(MTurkTaskWorld):
                 }
                 self.mturk_agent.observe(ad)
                 quote_description_message = self.mturk_agent.act()
+                if 'task_data' not in quote_description_message:
+                    print(self.mturk_agent.worker_id, '| DISCONNECT:', quote_description_message)
+                    self.episodeDone = True
+                    return
                 self.quote_description = quote_description_message['text']
 
                 print(self.mturk_agent.worker_id,
@@ -404,6 +412,10 @@ class ContextEvaluationWorld(MTurkTaskWorld):
             }
             self.mturk_agent.observe(ad)
             task_rating_message = self.mturk_agent.act()  # Receive task rating
+            if 'task_data' not in task_rating_message:
+                print(self.mturk_agent.worker_id, '| DISCONNECT:', task_rating_message)
+                self.episodeDone = True
+                return
             self.task_rating = task_rating_message['task_data']['form_responses'][0]['response']
 
             # Solicit free-form text feedback
@@ -415,6 +427,10 @@ class ContextEvaluationWorld(MTurkTaskWorld):
             }
             self.mturk_agent.observe(ad)
             feedback_message = self.mturk_agent.act()
+            if 'task_data' not in feedback_message:
+                print(self.mturk_agent.worker_id, '| DISCONNECT:', feedback_message)
+                self.episodeDone = True
+                return
             self.feedback = feedback_message['text']
             print(self.mturk_agent.worker_id, '| task_rating:', self.task_rating, '| feedback:', self.feedback)
 
@@ -449,11 +465,11 @@ class ContextEvaluationWorld(MTurkTaskWorld):
                 if self.dataset == 'dream':
                     for i in range(len(sentences_chosen)):
                         for speaker, name in self.dream_speaker_to_name.items():
-                            if sentences_chosen[i].startswith(speaker + ': '):
+                            if (sentences_chosen[i].startswith(speaker + ': ')) or (sentences_chosen[i].startswith(speaker + ' : ')):
                                 sentences_chosen[i] = sentences_chosen[i].replace(speaker, name, 1)
                                 break
                 sentences_chosen = '\n'.join(sentences_chosen)
-                for punct in {'.', '?', '!', ';', ','}:
+                for punct in {'.', '?', '!', ';', ',', '\'', ':', 'n\'t'}:
                     sentences_chosen = sentences_chosen.replace(' ' + punct, punct)
 
                 prompt_text = sentences_chosen + '\n\n' + prompt_text
@@ -500,7 +516,7 @@ class ContextEvaluationWorld(MTurkTaskWorld):
         if 'task_data' not in response_message:
             print(self.mturk_agent.worker_id, '| DISCONNECT:', response_message)
             self.episodeDone = True
-            return None
+            return
         response = response_message['task_data']['form_responses'][0]['response']
 
         if sample is not None:
@@ -603,8 +619,8 @@ class ContextEvaluationWorld(MTurkTaskWorld):
         elif len(self.block_reasons) > 0:
             self.mturk_agent.reject_work('effort')
             if not self.is_sandbox:
-                # self.mturk_agent.mturk_manager.soft_block_worker(self.mturk_agent.worker_id)
-                self.mturk_agent.block_worker('effort')
+                self.mturk_agent.mturk_manager.soft_block_worker(self.mturk_agent.worker_id)
+                # self.mturk_agent.block_worker('effort')
         elif len(self.reject_reasons) > 0:
             self.mturk_agent.reject_work('effort')
         else:
