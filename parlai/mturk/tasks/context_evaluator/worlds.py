@@ -473,6 +473,7 @@ class ContextEvaluationWorld(MTurkTaskWorld):
 
     def prompt_and_receive_response(self, prompt_text, prompt_type, sample=None):
         # Clear previous answer from form. Emphasize questions are unrelated.
+        print(sample['eval_labels'][0])
         ad = {
             'episode_done': False,
             'id': 'New ' + prompt_type,
@@ -580,7 +581,7 @@ class ContextEvaluationWorld(MTurkTaskWorld):
                         self.block_reasons.append(reason)
 
         # Bonus for above-average accuracy
-        for prompt_type, prompt_type_acc in self.accuracy:
+        for prompt_type, prompt_type_acc in self.accuracy.items():
             if prompt_type_acc > self.accuracy_bonus_threshold[prompt_type]:
                 self.bonus_reasons.append(prompt_type + ' accuracy = ' + str(prompt_type_acc))
 
@@ -598,12 +599,13 @@ class ContextEvaluationWorld(MTurkTaskWorld):
             self.mturk_agent.approve_work()
             bonus_amount = round(.5 * self.reward, 2)
             self.mturk_agent.pay_bonus(bonus_amount, 'Great accuracy!')
-        if len(self.block_reasons) > 0:
+            print(self.mturk_agent.worker_id, '| BONUS AWARDED')
+        elif len(self.block_reasons) > 0:
             self.mturk_agent.reject_work('effort')
             if not self.is_sandbox:
-                self.mturk_agent.mturk_manager.soft_block_worker(self.mturk_agent.worker_id)
-                # self.mturk_agent.block_worker('effort')
-        elif len(self.reject_reasons):
+                # self.mturk_agent.mturk_manager.soft_block_worker(self.mturk_agent.worker_id)
+                self.mturk_agent.block_worker('effort')
+        elif len(self.reject_reasons) > 0:
             self.mturk_agent.reject_work('effort')
         else:
             self.mturk_agent.approve_work()
