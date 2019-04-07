@@ -582,7 +582,7 @@ class ContextEvaluationWorld(MTurkTaskWorld):
 
         # Bonus for above-average accuracy
         for prompt_type, prompt_type_acc in self.accuracy.items():
-            if prompt_type_acc > self.accuracy_bonus_threshold[prompt_type]:
+            if prompt_type_acc >= self.accuracy_bonus_threshold[prompt_type]:
                 self.bonus_reasons.append(prompt_type + ' accuracy = ' + str(prompt_type_acc))
 
         # Bonus for changing your answer based on context
