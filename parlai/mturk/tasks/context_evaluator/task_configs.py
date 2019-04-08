@@ -41,7 +41,7 @@ task_configs = {
         'max_hits_per_worker': 100,
     },
     'quote and question': {
-        'evaluation_data_dir': '../allennlp/eval/dream/oracle/test',
+        'evaluation_data_dir': '../allennlp/eval/dream/sl/test',
         'reward': 1.12,  # RACE: 1.5, 11m, .75 bonus
         'hit_description': 'Can you answer passage comprehension questions using just a quote?',
         'task_description': """
