@@ -230,8 +230,8 @@ class ContextEvaluationWorld(MTurkTaskWorld):
         self.prompt_types = [opt['prompt_type']]
         self.accuracy_bonus_threshold = {
             'dream': {
-                'quote and question': .65,  # Median: .6
-                'question': .5,  # Median: .45
+                'quote and question': .6,
+                'question': .5,
             },
             'race': {
                 'quote and question': .55,
