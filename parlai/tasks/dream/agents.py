@@ -73,8 +73,8 @@ class IndexTeacher(FixedDialogTeacher):
                     options_text[option_no] = self._answer_idx_to_letter[option_no] + ': ' + options_text[option_no]
 
                 # Generate a Question ID by adding to diag_id
-                # qid = self.split + '/' + diag_id + '/' + str(idx)  # TFIDF, FastText
-                qid = diag_id + '-q' + str(idx)
+                qid = self.split + '/' + diag_id + '/' + str(idx)  # TFIDF, FastText
+                # qid = diag_id + '-q' + str(idx)
 
                 # Add example
                 self.examples.append({

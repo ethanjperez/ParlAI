@@ -5,7 +5,7 @@ srun --pty --mem=20000 -t 1-23:58 bash
 . ~/parlai.sh
 export PYTHONPATH='.'
 git pull
-python parlai/mturk/tasks/context_evaluator/run.py --live --dataset dream
+python parlai/mturk/tasks/context_evaluator/run.py --live --dataset dream --prompt-type "question and answer quotes"
 
 # Bonus workers (local)
 conda activate parlai2
