@@ -276,7 +276,8 @@ class ParlaiParser(argparse.ArgumentParser):
     def add_context_evaluation_args(self):
         evaluation = self.add_argument_group('Context Evaluation')
         evaluation.add_argument(
-            '--prompt-type', default='quote and question', type=str, choices=['quote and question', 'question'],
+            '--prompt-type', default='quote and question', type=str,
+            choices=['quote and question', 'question', 'question and answer quotes'],
             help='Which type of prompt to provide to workers')
         evaluation.add_argument(
             '--dataset', default='race', type=str, choices=['race', 'dream'],

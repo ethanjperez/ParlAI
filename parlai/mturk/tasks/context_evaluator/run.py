@@ -57,7 +57,7 @@ def main():
     # The values in these maps should always be non-negative
     active_workers_per_incomplete_hit_by_split, active_workers_by_split, incomplete_hits_by_split = {}, {}, {}
     for q_spl in range(opt['question_splits']):
-        option_splits = 1 if opt['prompt_type'] == 'question' else opt['num_options']
+        option_splits = 1 if opt['prompt_type'] in {'question', 'question and answer quotes'} else opt['num_options']
         for o_spl in range(option_splits):
             active_workers_by_split[(q_spl, o_spl)] = 0
             incomplete_hits_by_split[(q_spl, o_spl)] = opt['num_conversations'] / (

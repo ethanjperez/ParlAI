@@ -8,7 +8,7 @@ task_configs = {
     'general': {
         'block_qualification': 'poor performance',
         'count_complete': True,
-        'max_time': 7200,
+        'max_time': 900,
         'max_time_qual': 'max time',
         'frontend_version': 1,
         'hit_title': 'Guess the answer!',  # Passage comprehension [with just quotes / without the passage]
@@ -42,7 +42,8 @@ task_configs = {
     },
     'quote and question': {
         'evaluation_data_dir': '../allennlp/eval/dream/sl-t/test',
-        'reward': 1.12,  # RACE: 1.5, 11m, .75 bonus
+        'reward': 1.12,  # RACE: 1.5, 11m, .75 bonus. DREAM: 1.12, 8m, .56 bonus
+        'assignment_duration_in_seconds': 2700,
         'hit_description': 'Can you answer passage comprehension questions using just a quote?',
         'task_description': """
             <b>Your Goal</b>: See how well you can guess the answers to passage-comprehension exam questions, given just a quote from the passage.
@@ -76,7 +77,8 @@ task_configs = {
     'question': {
         'evaluation_data_dir': None,
         'num_conversations': 25,
-        'reward': 1.0,  # DREAM: .76, 5 min, .37 bonus
+        'reward': 1.0,  # RACE: 1.0, 7m, .5 bonus. DREAM: .76, 5m, .37 bonus
+        'assignment_duration_in_seconds': 1800,
         'hit_description': 'Can you answer passage comprehension questions without the passage?',
         'task_description': """
             <b>Your Goal</b>: See how well you can answer passage-comprehension exam questions, without the passage - just the question and answer options.
@@ -103,6 +105,47 @@ task_configs = {
             
             Which option is most likely correct?<br>
             <b>Guesser</b>: D
+        """
+    },
+    'question and answer quotes': {
+        # 'evaluation_data_dir': '../allennlp/eval/race/race.ⅱ.m=sl-sents.i.lr=2e-5.bsz=12.n=1.x=0.5.c=concat/dev.num_passages=13',
+        'evaluation_data_dir': '../allennlp/eval/dream/tfidf.o/test',
+        'num_conversations': 25,
+        'reward': 2.0,  # RACE: 3.0, 22m, 1.5 bonus. DREAM: 2.0, 14m, 1.0 bonus (8.7% higher bar)
+        'assignment_duration_in_seconds': 5400,
+        'hit_description': 'Can you answer passage comprehension questions using just a few quotes?',
+        'task_description': """
+            <b>Your Goal</b>: See how well you can guess the answers to passage-comprehension exam questions, given just passage quotes (one sentence supporting each possible answer).
+            You\'ll get a bonus if you do well!<br><br>
+            
+            <b>Our Goal</b>: We\'re evaluating a tool we\'ve developed to help people answer questions about large amounts of text, without having to read all of it themselves.<br><br>
+            
+            <font color="blue"><b>IMPORTANT</b></font>: Our setup inherently makes many questions challenging to answer. For these questions, just give your best guess! The task is meant to be fun.<br><br>
+            
+            <b>Questions in HIT</b>: 20<br>
+            <b>Time</b>: 14 minutes<br>
+            <b>Bonus</b>: $1 for exceeding average worker accuracy<br>
+            <b>Payout</b>: Immediate<br>
+            <b>Qualifying</b>: Must pass 3 trial questions first. We have the right to reject work for workers who pass the qualifier but provide spam on the real HIT.<br><br>
+            
+            <b>------------------- EXAMPLE -------------------</b> <br><br>
+            <b>Question and Answer-Supporting Passage Quotes</b>:<br>
+            What does the doctor think of Heelys?<br><br>
+            
+            A: They are too expensive to buy.<br>
+            "No, it's a special kind of shoes called Heelys."<br><br>
+            
+            B: They are too fast to go.<br>
+            "It's said that some children fell down and got hurt while wearing these shoes."<br><br>
+            
+            C: They are bad for kids' health.<br>
+            " 'Wearing Heelys for a long time could stop young people from developing their legs.' "<br><br>
+            
+            D: They are good for training.<br>
+            "Sometimes he even follows his parents' car to the supermarket in his Heelys!"<br><br>
+            
+            <b>Which option is most likely correct?</b><br>
+            <b>Guesser</b>: C
         """
     },
 }

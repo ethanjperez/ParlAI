@@ -25,35 +25,6 @@ class ContextEvaluationOnboardWorld(MTurkOnboardWorld):
         self.options = ['A', 'B', 'C', 'D']  # Always use all 4 answer-options for practice questions.
         self.prompt_types = [opt['prompt_type']]
         self.test_questions = {
-            'question': [
-                {
-                    'text': 'When Fred opens his pantry, he is surprised the banana is not colored _.\n\n' +
-                            'A. Gray-ish blue\n' +
-                            'B. Purple and pink\n' +
-                            'C. Green or yellow\n' +
-                            'D. Plain white',
-                    'answer': 'C',
-                    'qid': 'question/trial/0',
-                },
-                {
-                    'text': 'He who considers himself to be better and more important than others is likely to _.\n\n' +
-                            'A. have his head in the clouds\n' +
-                            'B. be easy to deal with\n' +
-                            'C. have "common sense"\n' +
-                            'D. have a "big head"',
-                    'answer': 'D',
-                    'qid': 'question/trial/1',
-                },
-                {
-                    'text': 'What does Alan\'s grandfather do every Sunday?\n\n' +
-                            'A. He hosts crazy parties.\n' +
-                            'B. He studies for the medical school entrance exam.\n' +
-                            'C. He flies to Hawaii and back.\n' +
-                            'D. He goes to church with his wife.',
-                    'answer': 'D',
-                    'qid': 'question/trial/2',
-                },
-            ],
             'quote and question': [
                 {
                     'text': '"Wow, I never knew a banana could be that color."\n\n' +
@@ -86,6 +57,94 @@ class ContextEvaluationOnboardWorld(MTurkOnboardWorld):
                     'qid': 'quote and question/trial/2',
                 },
             ],
+            'question': [
+                {
+                    'text': 'When Fred opens his pantry, he is surprised the banana is not colored _.\n\n' +
+                            'A. Gray-ish blue\n' +
+                            'B. Purple and pink\n' +
+                            'C. Green or yellow\n' +
+                            'D. Plain white',
+                    'answer': 'C',
+                    'qid': 'question/trial/0',
+                },
+                {
+                    'text': 'He who considers himself to be better and more important than others is likely to _.\n\n' +
+                            'A. have his head in the clouds\n' +
+                            'B. be easy to deal with\n' +
+                            'C. have "common sense"\n' +
+                            'D. have a "big head"',
+                    'answer': 'D',
+                    'qid': 'question/trial/1',
+                },
+                {
+                    'text': 'What does Alan\'s grandfather do every Sunday?\n\n' +
+                            'A. He hosts crazy parties.\n' +
+                            'B. He studies for the medical school entrance exam.\n' +
+                            'C. He flies to Hawaii and back.\n' +
+                            'D. He goes to church with his wife.',
+                    'answer': 'D',
+                    'qid': 'question/trial/2',
+                },
+            ],
+            'question and answer quotes': [
+                {
+                    'text': """
+Grocery store price lists are updated by _.
+
+A: an employee
+“'(2)' Of course I'll respect you in the morning.”
+
+B: a telephone receiver
+“If the price list is right, you'll be charged accurately.”
+
+C: an adding machine
+“Grocery stores update the price list each day -- that is, somebody sits at a keyboard and types in the prices.”
+
+D: a typewriter
+“Grocery stores update the price list each day -- that is, somebody sits at a keyboard and types in the prices.”
+                    """,
+                    'answer': 'A',
+                    'qid': 'quote and question/trial/0',
+                },
+                {
+                    'text': """
+Which is TRUE about LIFE WATERR?
+
+A: It's also good for the stomach.
+“You need LIFE WATERR when you feel thirsty after exercise, work in the office a long time, or party all night.”
+
+B: It can't be sold without a doctor.
+“* If you are taking any special medication or have stomach problems, please check with the doctor before buying LIFE WATERR.”
+
+C: It's made from spring water in the mountains.
+“Never drink from tap water again.”
+
+D: It's not expensive.
+“For only a little money, you will feel great again!”
+                    """,
+                    'answer': 'D',
+                    'qid': 'quote and question/trial/1',
+                },
+                {
+                    'text': """
+Sudha Chandran is an _ dancer.
+
+A: English
+“That evening when she asked her dad the usual question, he didn't say anything.”
+
+B: Indian
+“He just touched her feet as a praise.”
+
+C: Australian
+“If you have the will to win, you can achieve anything.”
+
+D: American
+“Sudha's comeback was so moving that a film producer decided to make the story into a hit film.”
+                    """,
+                    'answer': 'B',
+                    'qid': 'quote and question/trial/2',
+                },
+            ],
         }
 
         for prompt_type in self.test_questions.keys():
@@ -101,6 +160,16 @@ class ContextEvaluationOnboardWorld(MTurkOnboardWorld):
                     'To qualify for the HIT, you\'ll need to answer all practice questions correct.',
         }
         self.mturk_agent.observe(ad)
+
+        if prompt_type in {'question and answer quotes'}:
+            ad = {
+                'episode_done': False,
+                'id': 'System',
+                'text': 'Note: The answer-supporting quotes may not always be helpful. ' +
+                        'However, you may still be able to guess the answer based on the question and options alone. ' +
+                        'Other times, an answer\'s quote may be helpful, but only because it contradicts that answer or supports a different option.',
+            }
+            self.mturk_agent.observe(ad)
 
         for test_question in self.test_questions[prompt_type]:
             response = self.prompt_and_receive_response(test_question['text'], prompt_type, test_question['answer'])
@@ -232,20 +301,24 @@ class ContextEvaluationWorld(MTurkTaskWorld):
             'dream': {
                 'quote and question': .6,
                 'question': .5,
+                'question and answer quotes': .83,
             },
             'race': {
                 'quote and question': .55,
                 'question': .47,
+                'question and answer quotes': .8,
             },
         }[self.dataset]
         self.median_sample_ms_reject_threshold = {
             'dream': {
                 'quote and question': 4500,
                 'question': 4000,
+                'question and answer quotes': 6000,
             },
             'race': {
                 'quote and question': 7000,
                 'question': 6000,
+                'question and answer quotes': 10000,
             },
         }[self.dataset]
         self.response_freq_reject_threshold = {
@@ -276,9 +349,9 @@ class ContextEvaluationWorld(MTurkTaskWorld):
         if evaluation_data:
             self.num_changed_responses = 0
             self.num_debate_mode_responses = 0
-            possible_debate_modes = list(evaluation_data.keys())
-            possible_debate_modes.sort()
-            self.sample_debate_modes = [possible_debate_modes[random.randint(0, len(possible_debate_modes) - 1) - self.option_split_no]
+            self.possible_debate_modes = list(evaluation_data.keys())
+            self.possible_debate_modes.sort()
+            self.sample_debate_modes = [self.possible_debate_modes[random.randint(0, len(self.possible_debate_modes) - 1) - self.option_split_no]
                                         for _ in range(self.max_collected)]
             print(self.mturk_agent.worker_id, '| DEBATE MODES:', self.sample_debate_modes)
 
@@ -447,33 +520,46 @@ class ContextEvaluationWorld(MTurkTaskWorld):
         else:
             # Get prompt text from dataset teacher agent
             sample = self.task.act()
-            sample['debate_mode'] = self.sample_debate_modes[self.num_collected] if self.evaluation_data else None
-            prompt_text = '\n'.join([sample['question'] + '\n'] + sample['options'])
+            sample['debate_mode'] = self.sample_debate_modes[self.num_collected] if ('quote and question' in self.prompt_types) else None
 
             # Question-only evaluation
             if 'question' in self.prompt_types:
+                prompt_text = '\n'.join([sample['question'] + '\n'] + sample['options'])
                 question_response = self.prompt_and_receive_response(prompt_text, 'question', sample)
                 if question_response is None:
                     return
 
+            # Question-only evaluation
+            if 'question and answer quotes' in self.prompt_types:
+                prompt_text = sample['question']
+                sample['sentences_chosen'] = []
+                for i, debate_mode in enumerate(self.possible_debate_modes):
+                    evaluation_sample = self.evaluation_data[debate_mode][sample['qid']]
+                    sentences_chosen = [evaluation_sample['sentences_chosen'][0]]  # NB: Always picks first agent only
+                    sentences_chosen = self._format_sentences(sentences_chosen)
+                    sentences_chosen = '\n'.join(sentences_chosen)
+                    prompt_text += '\n\n' + sample['options'][i] + '\n“' + sentences_chosen + '”'
+                    sample['sentences_chosen'].append(sentences_chosen)
+                sample['sentences_chosen'] = '\n'.join(sample['sentences_chosen'])
+
+                question_and_answer_quotes_response = self.prompt_and_receive_response(
+                    prompt_text, 'question and answer quotes', sample)
+                if question_and_answer_quotes_response is None:
+                    return
+
             # Context+Question evaluation
             if 'quote and question' in self.prompt_types:
+                # Get sentences chosen
                 evaluation_sample = self.evaluation_data[sample['debate_mode']][sample['qid']]
-                sentences_chosen = [evaluation_sample['sentences_chosen'][0]]  # NB: Always picks first agent
+                sentences_chosen = [evaluation_sample['sentences_chosen'][0]]  # NB: Always picks first agent only
+                sentences_chosen = self._format_sentences(sentences_chosen)
 
-                # Format and preprocess selected sentences
-                if self.dataset == 'dream':
-                    for i in range(len(sentences_chosen)):
-                        for speaker, name in self.dream_speaker_to_name.items():
-                            if (sentences_chosen[i].startswith(speaker + ': ')) or (sentences_chosen[i].startswith(speaker + ' : ')):
-                                sentences_chosen[i] = sentences_chosen[i].replace(speaker, name, 1)
-                                break
+                # Format prompt
                 sentences_chosen = '\n'.join(sentences_chosen)
-                for punct in {'.', '?', '!', ';', ',', '\'', ':', 'n\'t'}:
-                    sentences_chosen = sentences_chosen.replace(' ' + punct, punct)
-
+                prompt_text = '\n'.join([sample['question'] + '\n'] + sample['options'])
                 prompt_text = sentences_chosen + '\n\n' + prompt_text
                 sample['sentences_chosen'] = sentences_chosen
+
                 quote_and_question_response = self.prompt_and_receive_response(prompt_text, 'quote and question', sample)
                 if quote_and_question_response is None:
                     return
@@ -647,3 +733,19 @@ class ContextEvaluationWorld(MTurkTaskWorld):
             'option_split_no': self.option_split_no,
             'freq_changed_responses': self.freq_changed_responses,
         }
+
+    def _format_sentences(self, sentence_list):
+        """
+        Format and preprocess selected sentences before showing to workers.
+        """
+        for i in range(len(sentence_list)):
+            if self.dataset == 'dream':
+                for speaker, name in self.dream_speaker_to_name.items():
+                    if (sentence_list[i].startswith(speaker + ': ')) or (sentence_list[i].startswith(speaker + ' : ')):
+                        sentence_list[i] = sentence_list[i].replace(speaker, name, 1)
+                        break
+            for punct in {'.', '?', '!', ';', ',', '\'', ':', 'n\'t', '%', ')'}:
+                sentence_list[i] = sentence_list[i].replace(' ' + punct, punct)
+            for punct in {'$', '('}:
+                sentence_list[i] = sentence_list[i].replace(punct + ' ', punct)
+        return sentence_list
