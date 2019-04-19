@@ -104,7 +104,7 @@ D: a typewriter
 “Grocery stores update the price list each day -- that is, somebody sits at a keyboard and types in the prices.”
                     """,
                     'answer': 'A',
-                    'qid': 'quote and question/trial/0',
+                    'qid': 'question and answer quotes/trial/0',
                 },
                 {
                     'text': """
@@ -123,7 +123,7 @@ D: It's not expensive.
 “For only a little money, you will feel great again!”
                     """,
                     'answer': 'D',
-                    'qid': 'quote and question/trial/1',
+                    'qid': 'question and answer quotes/trial/1',
                 },
                 {
                     'text': """
@@ -142,7 +142,26 @@ D: American
 “Sudha's comeback was so moving that a film producer decided to make the story into a hit film.”
                     """,
                     'answer': 'B',
-                    'qid': 'quote and question/trial/2',
+                    'qid': 'question and answer quotes/trial/2',
+                },
+                {
+                    'text': """
+How are the speakers related?
+
+A: Siblings.
+“.”
+
+B: Father and son.
+“Man: My father always says that.”
+
+C: Friends.
+“.”
+
+D: Mother and daughter.
+“Woman: My mother loves those.”
+                    """,
+                    'answer': 'C',
+                    'qid': 'question and answer quotes/trial/3',
                 },
             ],
         }
@@ -301,7 +320,7 @@ class ContextEvaluationWorld(MTurkTaskWorld):
             'dream': {
                 'quote and question': .6,
                 'question': .5,
-                'question and answer quotes': .83,
+                'question and answer quotes': .8,
             },
             'race': {
                 'quote and question': .55,
