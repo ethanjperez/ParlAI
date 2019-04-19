@@ -8,7 +8,7 @@ task_configs = {
     'general': {
         'block_qualification': 'poor performance',
         'count_complete': True,
-        'max_time': 900,
+        'max_time': 5400,
         'max_time_qual': 'max time',
         'frontend_version': 1,
         'hit_title': 'Guess the answer!',  # Passage comprehension [with just quotes / without the passage]
