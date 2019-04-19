@@ -89,29 +89,10 @@ class ContextEvaluationOnboardWorld(MTurkOnboardWorld):
             'question and answer quotes': [
                 {
                     'text': """
-Grocery store price lists are updated by _.
-
-A: an employee
-“'(2)' Of course I'll respect you in the morning.”
-
-B: a telephone receiver
-“If the price list is right, you'll be charged accurately.”
-
-C: an adding machine
-“Grocery stores update the price list each day -- that is, somebody sits at a keyboard and types in the prices.”
-
-D: a typewriter
-“Grocery stores update the price list each day -- that is, somebody sits at a keyboard and types in the prices.”
-                    """,
-                    'answer': 'A',
-                    'qid': 'question and answer quotes/trial/0',
-                },
-                {
-                    'text': """
 Which is TRUE about LIFE WATERR?
 
 A: It's also good for the stomach.
-“You need LIFE WATERR when you feel thirsty after exercise, work in the office a long time, or party all night.”
+“You need LIFE WATERR when you feel thirsty after exercise or work in the office a long time.”
 
 B: It can't be sold without a doctor.
 “* If you are taking any special medication or have stomach problems, please check with the doctor before buying LIFE WATERR.”
@@ -123,26 +104,26 @@ D: It's not expensive.
 “For only a little money, you will feel great again!”
                     """,
                     'answer': 'D',
-                    'qid': 'question and answer quotes/trial/1',
+                    'qid': 'question and answer quotes/trial/0',
                 },
                 {
                     'text': """
-Sudha Chandran is an _ dancer.
+Anika Patel is an _ dancer.
 
-A: English
-“That evening when she asked her dad the usual question, he didn't say anything.”
+A: Russian
+“You can win, Anika.”
 
 B: Indian
-“He just touched her feet as a praise.”
+“You can win, Anika.”
 
-C: Australian
-“If you have the will to win, you can achieve anything.”
+C: Ethiopian
+“.”
 
-D: American
-“Sudha's comeback was so moving that a film producer decided to make the story into a hit film.”
+D: Spanish
+“You can win, Anika.”
                     """,
                     'answer': 'B',
-                    'qid': 'question and answer quotes/trial/2',
+                    'qid': 'question and answer quotes/trial/1',
                 },
                 {
                     'text': """
@@ -161,7 +142,7 @@ D: Mother and daughter.
 “Woman: My mother loves those.”
                     """,
                     'answer': 'C',
-                    'qid': 'question and answer quotes/trial/3',
+                    'qid': 'question and answer quotes/trial/2',
                 },
             ],
         }
