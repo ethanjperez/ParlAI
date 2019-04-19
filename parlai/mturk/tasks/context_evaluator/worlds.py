@@ -91,17 +91,17 @@ class ContextEvaluationOnboardWorld(MTurkOnboardWorld):
                     'text': """
 Which is TRUE about LIFE WATERR?
 
-A: It's also good for the stomach.
+A: It's also good for stomach problems.
 “You need LIFE WATERR when you feel thirsty after working in the office a long time.”
 
 B: It can't be sold without a doctor.
 “* If you are taking any special medication or have stomach problems, please check with the doctor before buying LIFE WATERR.”
 
 C: It's made from spring water in the mountains.
-“Never drink from tap water again.”
+“Purified H2O straight from the Pacific Ocean.”
 
 D: It's not expensive.
-“For only a little money, you will feel great again!”
+“For only a little money, you will feel great!”
                     """,
                     'answer': 'D',
                     'qid': 'question and answer quotes/trial/0',
@@ -127,19 +127,19 @@ D: Argentinian
                 },
                 {
                     'text': """
-How are the speakers related?
+How are the two speakers related?
 
-A: Siblings.
+A: Brother and sister.
 “.”
 
 B: Father and son.
-“Man: My father always says that.”
+“Man: My father always said that was true.”
 
 C: Friends.
 “.”
 
 D: Mother and daughter.
-“Woman: My mother loves those.”
+“Woman: Yes, my father would always say that too.”
                     """,
                     'answer': 'C',
                     'qid': 'question and answer quotes/trial/2',
