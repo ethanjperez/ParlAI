@@ -86,63 +86,63 @@ class ContextEvaluationOnboardWorld(MTurkOnboardWorld):
                     'qid': 'question/trial/2',
                 },
             ],
-            'question and answer quotes': [
-                {
-                    'text': """
-Which is TRUE about LIFE WATERR?
-
-A: It's also good for stomach problems.
-“You need LIFE WATERR when you feel thirsty after working in the office a long time.”
-
-B: It can't be sold without a doctor.
-“* If you are taking any special medication or have stomach problems, please check with the doctor before buying LIFE WATERR.”
-
-C: It's made from spring water in the mountains.
-“Purified H2O straight from the Pacific Ocean.”
-
-D: It's not expensive.
-“For only a little money, you will feel great!”
-                    """,
-                    'answer': 'D',
-                    'qid': 'question and answer quotes/trial/0',
-                },
+            'question, answers, and quotes': [
                 {
                     'text': """
 Anika Patel is an _ dancer.
 
 A: Austrian
-“You can win, Anika.”
+Quote: “You can win, Anika.”
 
 B: Indian
-“You can win, Anika.”
+Quote: “You can win, Anika.”
 
 C: Ethiopian
-“.”
+Quote: “.”
 
 D: Argentinian
-“You can win, Anika.”
+Quote: “You can win, Anika.”
                     """,
                     'answer': 'B',
-                    'qid': 'question and answer quotes/trial/1',
+                    'qid': 'question, answers, and quotes/trial/0',
                 },
                 {
                     'text': """
-How are the two speakers related?
+Which is TRUE about LIFE WATERR?
 
-A: Brother and sister.
-“.”
+A: It can't be sold without a doctor.
+Quote: “* If you are taking any special medication or have stomach problems, please check with the doctor before buying LIFE WATERR.”
 
-B: Father and son.
-“Man: My father always said that was true.”
+B: It's also good for stomach problems.
+Quote: “You need LIFE WATERR when you feel thirsty after working in the office a long time.”
 
-C: Friends.
-“.”
+C: It's not expensive.
+Quote: “For only a little money, you will feel great!”
 
-D: Mother and daughter.
-“Woman: Yes, my father would always say that too.”
+D: It's made from spring water in the mountains.
+Quote: “Purified H2O straight from the Pacific Ocean.”
                     """,
                     'answer': 'C',
-                    'qid': 'question and answer quotes/trial/2',
+                    'qid': 'question, answers, and quotes/trial/1',
+                },
+                {
+                    'text': """
+Why did the Prior complain about the delay?
+
+A: Because he knew that genius might be busiest when seemingly idlest.
+Quote: “The creative artist needs time for contemplation; he may be busiest when his hands are idlest.”
+
+B: Because he liked the work of a stonemason.
+Quote: “Leonardo was slightly unhappy and explained to somebody else that there is a great difference between the work of the creative artist and the stonemason.”
+
+C: Because he was eager to be taken as a model for Judas.
+Quote: “But he would look no further; if none came his way, he would be satisfied to take Prior as a model for Judas.”
+
+D: Because he thought that the painter idled most of the hours.
+Quote: “This inactivity aroused the anger of the fussy Prior, the head of the church, who belonged to the large group of those who believed that the busier a man seems, the more he accomplishes; and so he tried to find fault with the idle painter.”
+                    """,
+                    'answer': 'D',
+                    'qid': 'question, answers, and quotes/trial/2',
                 },
             ],
         }
@@ -161,15 +161,25 @@ D: Mother and daughter.
         }
         self.mturk_agent.observe(ad)
 
-        if prompt_type in {'question and answer quotes'}:
+        if prompt_type in {'question, answers, and quotes'}:
             ad = {
                 'episode_done': False,
                 'id': 'System',
                 'text': 'Note: The answer-supporting quotes may not always be helpful. ' +
                         'However, you may still be able to guess the answer based on the question and options alone. ' +
                         'Other times, an answer\'s quote may be helpful, but only because it contradicts that answer or supports a different option.',
+                'task_data': {"respond_with_form": [{
+                    "type": "choices",
+                    "question": "Select an answer to continue",
+                    "choices": ['Sounds good', 'Great!', 'Bring it on.']
+                }]}
             }
             self.mturk_agent.observe(ad)
+            response_message = self.mturk_agent.act()
+            if 'task_data' not in response_message:
+                print(self.mturk_agent.worker_id, '| DISCONNECT:', response_message)
+                self.episodeDone = True
+                return
 
         for test_question in self.test_questions[prompt_type]:
             response = self.prompt_and_receive_response(test_question['text'], prompt_type, test_question['answer'])
@@ -301,24 +311,24 @@ class ContextEvaluationWorld(MTurkTaskWorld):
             'dream': {
                 'quote and question': .6,
                 'question': .5,
-                'question and answer quotes': .8,
+                'question, answers, and quotes': .8,
             },
             'race': {
                 'quote and question': .55,
                 'question': .47,
-                'question and answer quotes': .8,
+                'question, answers, and quotes': .8,
             },
         }[self.dataset]
         self.median_sample_ms_reject_threshold = {
             'dream': {
                 'quote and question': 4500,
                 'question': 4000,
-                'question and answer quotes': 6000,
+                'question, answers, and quotes': 6000,
             },
             'race': {
                 'quote and question': 7000,
                 'question': 6000,
-                'question and answer quotes': 10000,
+                'question, answers, and quotes': 10000,
             },
         }[self.dataset]
         self.response_freq_reject_threshold = {
@@ -530,7 +540,7 @@ class ContextEvaluationWorld(MTurkTaskWorld):
                     return
 
             # Question-only evaluation
-            if 'question and answer quotes' in self.prompt_types:
+            if 'question, answers, and quotes' in self.prompt_types:
                 prompt_text = sample['question']
                 sample['sentences_chosen'] = []
                 for i, debate_mode in enumerate(self.possible_debate_modes):
@@ -538,12 +548,12 @@ class ContextEvaluationWorld(MTurkTaskWorld):
                     sentences_chosen = [evaluation_sample['sentences_chosen'][0]]  # NB: Always picks first agent only
                     sentences_chosen = self._format_sentences(sentences_chosen)
                     sentences_chosen = '\n'.join(sentences_chosen)
-                    prompt_text += '\n\n' + sample['options'][i] + '\n“' + sentences_chosen + '”'
+                    prompt_text += '\n\n' + sample['options'][i] + '\nQuote: “' + sentences_chosen + '”'
                     sample['sentences_chosen'].append(sentences_chosen)
                 sample['sentences_chosen'] = '\n'.join(sample['sentences_chosen'])
 
                 question_and_answer_quotes_response = self.prompt_and_receive_response(
-                    prompt_text, 'question and answer quotes', sample)
+                    prompt_text, 'question, answers, and quotes', sample)
                 if question_and_answer_quotes_response is None:
                     return
 

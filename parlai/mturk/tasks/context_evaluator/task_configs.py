@@ -30,7 +30,6 @@ task_configs = {
     },
     'live': {
         'allowed_conversations': 1,
-        # 'disconnect_qualification': 'disconnect_tfidf',
         'hobby': True,
         'max_hits_per_worker': 1,
         'unique_worker': True,
@@ -107,7 +106,7 @@ task_configs = {
             <b>Guesser</b>: D
         """
     },
-    'question and answer quotes': {
+    'question, answers, and quotes': {
         # 'evaluation_data_dir': '../allennlp/eval/race/race.ⅱ.m=sl-sents.i.lr=2e-5.bsz=12.n=1.x=0.5.c=concat/dev.num_passages=13',
         'evaluation_data_dir': '../allennlp/eval/dream/tfidf.o/test',
         'num_conversations': 25,
@@ -133,16 +132,16 @@ task_configs = {
             What does the doctor think of Heelys?<br><br>
             
             A: They are too expensive to buy.<br>
-            "No, it's a special kind of shoes called Heelys."<br><br>
+            Quote: "No, it's a special kind of shoes called Heelys."<br><br>
             
             B: They are too fast to go.<br>
-            "It's said that some children fell down and got hurt while wearing these shoes."<br><br>
+            Quote: "It's said that some children fell down and got hurt while wearing these shoes."<br><br>
             
             C: They are bad for kids' health.<br>
-            " 'Wearing Heelys for a long time could stop young people from developing their legs.' "<br><br>
+            Quote: " 'Wearing Heelys for a long time could stop young people from developing their legs.' "<br><br>
             
             D: They are good for training.<br>
-            "Sometimes he even follows his parents' car to the supermarket in his Heelys!"<br><br>
+            Quote: "Sometimes he even follows his parents' car to the supermarket in his Heelys!"<br><br>
             
             <b>Which option is most likely correct?</b><br>
             <b>Guesser</b>: C
