@@ -89,19 +89,19 @@ class ContextEvaluationOnboardWorld(MTurkOnboardWorld):
             'question, answers, and quotes': [
                 {
                     'text': """
-Anika Patel is an _ dancer.
+John Smith is an _ dancer.
 
-A: Austrian
-Quote: “You can win, Anika.”
+A: Asian
+Quote: “You can win, John.”
 
-B: Indian
-Quote: “You can win, Anika.”
+B: American
+Quote: “You can win, John.”
 
-C: Ethiopian
+C: Argentinian
 Quote: “.”
 
-D: Argentinian
-Quote: “You can win, Anika.”
+D: Nigerian
+Quote: “You can win, John.”
                     """,
                     'answer': 'B',
                     'qid': 'question, answers, and quotes/trial/0',
@@ -311,7 +311,7 @@ class ContextEvaluationWorld(MTurkTaskWorld):
             'dream': {
                 'quote and question': .6,
                 'question': .5,
-                'question, answers, and quotes': .8,
+                'question, answers, and quotes': .83,
             },
             'race': {
                 'quote and question': .55,

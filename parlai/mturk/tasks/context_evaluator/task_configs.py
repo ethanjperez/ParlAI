@@ -108,7 +108,7 @@ task_configs = {
     },
     'question, answers, and quotes': {
         # 'evaluation_data_dir': '../allennlp/eval/race/race.ⅱ.m=sl-sents.i.lr=2e-5.bsz=12.n=1.x=0.5.c=concat/dev.num_passages=13',
-        'evaluation_data_dir': '../allennlp/eval/dream/tfidf.o/test',
+        'evaluation_data_dir': '../allennlp/eval/dream/oracle/test',
         'num_conversations': 25,
         'reward': 2.0,  # RACE: 3.0, 22m, 1.5 bonus. DREAM: 2.0, 14m, 1.0 bonus (8.7% higher bar)
         'assignment_duration_in_seconds': 5400,
