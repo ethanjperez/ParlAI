@@ -92,7 +92,7 @@ class ContextEvaluationOnboardWorld(MTurkOnboardWorld):
 Which is TRUE about LIFE WATERR?
 
 A: It's also good for the stomach.
-“You need LIFE WATERR when you feel thirsty after exercise or work in the office a long time.”
+“You need LIFE WATERR when you feel thirsty after working in the office a long time.”
 
 B: It can't be sold without a doctor.
 “* If you are taking any special medication or have stomach problems, please check with the doctor before buying LIFE WATERR.”
@@ -110,7 +110,7 @@ D: It's not expensive.
                     'text': """
 Anika Patel is an _ dancer.
 
-A: Russian
+A: Austrian
 “You can win, Anika.”
 
 B: Indian
@@ -119,7 +119,7 @@ B: Indian
 C: Ethiopian
 “.”
 
-D: Spanish
+D: Argentinian
 “You can win, Anika.”
                     """,
                     'answer': 'B',
