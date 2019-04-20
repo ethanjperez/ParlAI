@@ -165,13 +165,12 @@ Quote: “This inactivity aroused the anger of the fussy Prior, the head of the 
             ad = {
                 'episode_done': False,
                 'id': 'System',
-                'text': 'Note: The answer-supporting quotes may not always be helpful. ' +
-                        'However, you may still be able to guess the answer based on the question and options alone. ' +
-                        'Other times, an answer\'s quote may be helpful, but only because it contradicts that answer or supports a different option.',
+                'text': 'Note: Answer-supporting quotes won\'t always be helpful; sometimes, you\'ll have to guess from the question and answers only. ' +
+                        'Other times, the quote may contradict its answer or support a different answer.',
                 'task_data': {"respond_with_form": [{
                     "type": "choices",
-                    "question": "Select an answer to continue",
-                    "choices": ['Sounds good', 'Great!', 'Bring it on.']
+                    "question": "Are you ready?",
+                    "choices": ['Yes!', 'Of course', 'Bring it on.', 'Born ready']
                 }]}
             }
             self.mturk_agent.observe(ad)
@@ -311,7 +310,7 @@ class ContextEvaluationWorld(MTurkTaskWorld):
             'dream': {
                 'quote and question': .6,
                 'question': .5,
-                'question, answers, and quotes': .83,
+                'question, answers, and quotes': .75,
             },
             'race': {
                 'quote and question': .55,
@@ -323,7 +322,7 @@ class ContextEvaluationWorld(MTurkTaskWorld):
             'dream': {
                 'quote and question': 4500,
                 'question': 4000,
-                'question, answers, and quotes': 6000,
+                'question, answers, and quotes': 7000,
             },
             'race': {
                 'quote and question': 7000,
@@ -411,7 +410,7 @@ class ContextEvaluationWorld(MTurkTaskWorld):
             self.num_tested += 1
             return
         elif self.cur_example_no > (self.max_collected + self.num_test_turns):
-            if 'quote and question' in self.prompt_types:
+            if any(['quote' in prompt_type for prompt_type in self.prompt_types]):
                 # Get quote rating
                 ad = {
                     'episode_done': False,
