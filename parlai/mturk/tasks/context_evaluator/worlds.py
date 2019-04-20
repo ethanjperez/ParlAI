@@ -341,7 +341,7 @@ class ContextEvaluationWorld(MTurkTaskWorld):
                     answer_feedback_response, answer_feedback_duration = self.get_response_and_duration({
                         'episode_done': False,
                         'id': 'System',
-                        'text': 'The correct answer was ' + sample['eval_labels'][0] + '. Feel free to review the previous question and continue when you are ready.',
+                        'text': 'The correct answer was ' + sample['eval_labels'][0] + '. It may have been too tough to guess, but feel free to review the previous question and continue when you are ready.',
                         'task_data': {'respond_with_form': [{
                             'type': 'choices',
                             'question': 'Ready to continue?',
