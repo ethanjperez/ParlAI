@@ -381,20 +381,6 @@ D: He prefers not to work.
                 },
                 {
                     'text': """
-Amy Smith, a famous dancer from the U.S., had to have her right leg cut after a car accident. She was also cut off on her career road.\nThough the accident brought her bright career to a stop, she didn't give up. In the painful months that followed, Amy met a doctor who developed a man-made leg for her. So strongly, she wanted to go back to dancing. Amy believed in herself and she thought she could realize her dream.\n\nAfter every public recital, she would ask her dad about her performance. \"You still have a long way to go\" was the answer she used to get in return. In January 1984, Amy made a historic comeback by giving a public recital in Los Angeles. She performed in such a great manner that it moved everyone to tears. That evening when she asked her dad the usual question, he didn't say anything. He just touched her feet as a praise. Amy's comeback was so moving that a film producer decided to make the story into a hit film.\n\nWhen someone asked Amy how she had managed to dance again, she said quite simply, \"You don't need feet to dance!\"  Nothing is impossible in this world. If you have the will to win, you can achieve anything.
-
-Amy Smith is an _ dancer.
-
-A: Asian
-B: American
-C: Argentinian
-D: Nigerian
-                    """,
-                    'answer': 'B',
-                    'explanation': """Amy is "a famous dancer from the U.S.," so she must be American.""",
-                },
-                {
-                    'text': """
 Key responsibilities:\n* Manage the whole marketing activities, i.e. brand building, market research and integrated-marketing functions.\n*  Develop and evaluate brand activities including the development of promotional activities, advertising and merchandising.\n*  Obtain market share by developing marketing plans and programs for key brands.\n*  Conduct market and product research; maintain data base by identifying and gathering marketing information.\n*  Understand market/competitor intelligence and cooperate with the sales teams in developing the appropriate marketing strategies.\n*  Keep contacts and exchange of information with regional operations on marketing issues.\n*  Participate in and contribute to the budget and business planning cycle.\n*  Supervise the project to establish company websites.\n* Complete marketing department operational requirements by scheduling and assigning employees; develop, maintain, evaluate and lead the marketing team of pan-China.\n*  Serve as a member of the senior management team providing input and direction on the company's strategic and operational goals and objects.\nRequirements:\n*  University degree or above, MBA is a plus.\n*  At least Bi-lingual: Chinese and English, any other language is a plus.\n*  Strong wits and oral communication skills; analytic skill; active listening.\n*  Good at day to day lead and coach.\n*  More than 10 years working experience in sales and marketing of _ industry, including at least 5 years management experience; professional in marketing function.\nEmployer introduction:\nSummergate was established in 1999 to import, distribute and market some of the world's best wines to the Chinese market. Today Summergate represents more than 60 wineries from 12 countries around the world.\nWith offices in Beijing, Shanghai; Shenzhen, Guangzhou, Macau and now Hong Kong, Summergate services the entire China market. We distribute and market our brands to all the major food and beverage operators in China, establishing solid business partnerships with national hotel groups as well as all China retail chains and fine dining western and Chinese restaurants.
 
 According to the passage, the key responsibilities include _.

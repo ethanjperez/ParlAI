@@ -63,7 +63,7 @@ class IndexTeacher(FixedDialogTeacher):
             passage, qas, diag_id = diag
 
             # Concatenate Passage Turns
-            passage_text = " ".join(passage)
+            passage_text = "\n".join(passage)
 
             # Iterate through QAs
             for idx, qa in enumerate(qas):

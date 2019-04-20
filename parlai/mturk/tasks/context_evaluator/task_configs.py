@@ -184,11 +184,10 @@ task_configs = {
         """
     },
     'passage and question': {
-        # 'evaluation_data_dir': '../allennlp/eval/race/race.ⅱ.m=sl-sents.i.lr=2e-5.bsz=12.n=1.x=0.5.c=concat/dev.num_passages=13',
-        'evaluation_data_dir': '../allennlp/eval/dream/sl/test',
+        'evaluation_data_dir': None,
         'num_conversations': 25,
-        'reward': 3.0,  # ?
-        'assignment_duration_in_seconds': 5400,  # ?
+        'reward': 1.5,  # DREAM: 1.5, 11m, .75?, RACE: 3.0, 22m, 1.5?
+        'assignment_duration_in_seconds': 5400,
         'hit_description': 'How well can you answer passage comprehension questions?',
         'task_description': """
             <b>Your Goal</b>: See how well you can answer reading comprehension exam, multiple-choice questions.
@@ -196,7 +195,7 @@ task_configs = {
             
             <b>Questions in HIT</b>: 20<br>
             <b>Time</b>: 11 minutes<br>
-            <b>Bonus</b>: $1.5 for exceeding average worker accuracy<br>
+            <b>Bonus</b>: $.75 for exceeding average worker accuracy<br>
             <b>Payout</b>: Immediate<br>
             <b>Qualifying</b>: Must pass 5 trial questions first. We have the right to reject work for workers who pass the qualifier but provide spam on the real HIT.<br><br>
             

@@ -80,14 +80,14 @@ class ContextEvaluationWorld(MTurkTaskWorld):
                 'quote and question': 4500,
                 'question and quotes': 7000,
                 'quotes and question': 7000,
-                'passage and question': 10500,
+                'passage and question': 7000,
             },
             'race': {
                 'question': 6000,
                 'quote and question': 7000,
                 'question and quotes': 10000,
                 'quotes and question': 10000,
-                'passage and question': 15000,
+                'passage and question': 10000,
             },
         }[self.dataset]
         self.response_freq_reject_threshold = {
@@ -113,6 +113,10 @@ class ContextEvaluationWorld(MTurkTaskWorld):
             'A': 'Speaker A',
             'B': 'Speaker B',
         }
+        if 'passage and question' in self.prompt_types:
+            for option in self.options:  # Avoid replacing option name with speaker name
+                if option in self.dream_speaker_to_name:
+                    self.dream_speaker_to_name.pop(option)
 
         random.seed(0)
         self.sample_debate_modes = None
@@ -324,8 +328,9 @@ class ContextEvaluationWorld(MTurkTaskWorld):
                         self.num_debate_mode_responses += (quote_and_question_response ==
                                                            self.debate_mode_to_option[sample['debate_mode']])
                 elif prompt_type == 'passage and question':
+                    prompt_text = '\n' + '\n'.join(self._format_sentences(sample['text'].split('\n')))
                     passage_and_question_response = self.prompt_and_receive_response(
-                        sample['text'], 'passage and question', sample)
+                        prompt_text, 'passage and question', sample)
                     if passage_and_question_response is None:
                         return
                 else:
