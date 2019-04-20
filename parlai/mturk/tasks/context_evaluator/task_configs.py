@@ -106,16 +106,16 @@ task_configs = {
             <b>Guesser</b>: D
         """
     },
-    'question, answers, and quotes': {
+    'question and quotes': {
         # 'evaluation_data_dir': '../allennlp/eval/race/race.ⅱ.m=sl-sents.i.lr=2e-5.bsz=12.n=1.x=0.5.c=concat/dev.num_passages=13',
-        'evaluation_data_dir': '../allennlp/eval/dream/oracle/test',
+        'evaluation_data_dir': '../allennlp/eval/dream/sl/test',
         'num_conversations': 25,
-        'reward': 1.5,  # RACE: 3.0, 22m, 1.5 bonus. DREAM: 1.5, 11m, .75 bonus
+        'reward': 1.5,  # RACE: 3.0, 22m, 1.5 bonus (or change reward/bonus). DREAM: 1.5, 11m, 1.5 bonus (vs. 2.0, 11m, 1.0, with lower bonus) (vs. 1.5, 11m, .75, with shorter qualifier)
         'assignment_duration_in_seconds': 5400,
         'hit_description': 'Can you answer passage comprehension questions using just a few quotes?',
         'task_description': """
-            <b>Your Goal</b>: See how well you can guess the answers to passage-comprehension exam questions, given just passage quotes (one sentence supporting each possible answer).
-            You\'ll get a bonus if you do well!<br><br>
+            <b>Your Goal</b>: See how well you can guess the answers to passage-comprehension exam questions, given just passage quotes. For each possible multiple-choice answer, you\'ll receive one sentence quoted from the passage in defense of that answer.
+            You\'ll be paid double if you do well!<br><br>
             
             <b>Our Goal</b>: We\'re evaluating a tool for helping people quickly answer questions about lots of text.<br><br>
             
@@ -123,7 +123,7 @@ task_configs = {
             
             <b>Questions in HIT</b>: 20<br>
             <b>Time</b>: 11 minutes<br>
-            <b>Bonus</b>: $.75 for exceeding average worker accuracy<br>
+            <b>Bonus</b>: $1.5 for exceeding average worker accuracy<br>
             <b>Payout</b>: Immediate<br>
             <b>Qualifying</b>: Must pass 3 trial questions first. We have the right to reject work for workers who pass the qualifier but provide spam on the real HIT.<br><br>
             
@@ -131,17 +131,17 @@ task_configs = {
             <b>Question and Answer-Supporting Passage Quotes</b>:<br>
             What does the doctor think of Heelys?<br><br>
             
-            A: They are too expensive to buy.<br>
-            Quote: "No, it's a special kind of shoes called Heelys."<br><br>
+            Quote: “No, it's a special kind of shoes called Heelys.”<br>
+            A: They are too expensive to buy.<br><br>
             
-            B: They are too fast to go.<br>
-            Quote: "It's said that some children fell down and got hurt while wearing these shoes."<br><br>
+            Quote: “It's said that some children fell down and got hurt while wearing these shoes.”<br>
+            B: They are too fast to go.<br><br>
             
-            C: They are bad for kids' health.<br>
-            Quote: " 'Wearing Heelys for a long time could stop young people from developing their legs.' "<br><br>
+            Quote: “'Wearing Heelys for a long time could stop young people from developing their legs.'”<br>
+            C: They are bad for kids' health.<br><br>
             
-            D: They are good for training.<br>
-            Quote: "Sometimes he even follows his parents' car to the supermarket in his Heelys!"<br><br>
+            Quote: “Sometimes he even follows his parents' car to the supermarket in his Heelys!”<br>
+            D: They are good for training.<br><br>
             
             <b>Which option is most likely correct?</b><br>
             <b>Guesser</b>: C

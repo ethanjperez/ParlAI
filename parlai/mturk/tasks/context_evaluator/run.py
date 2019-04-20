@@ -4,8 +4,8 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 from parlai.core.params import ParlaiParser
-from parlai.mturk.tasks.context_evaluator.worlds import \
-    ContextEvaluationOnboardWorld, ContextEvaluationWorld
+from parlai.mturk.tasks.context_evaluator.worlds import ContextEvaluationWorld
+from parlai.mturk.tasks.context_evaluator.worlds_onboard import ContextEvaluationOnboardWorld
 from parlai.mturk.core.mturk_manager import MTurkManager
 from parlai.mturk.core import shared_utils
 from parlai.mturk.tasks.context_evaluator.task_configs import task_configs
