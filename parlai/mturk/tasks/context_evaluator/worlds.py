@@ -169,8 +169,8 @@ Quote: “This inactivity aroused the anger of the fussy Prior, the head of the 
                         'Other times, the quote may contradict its answer or support a different answer.',
                 'task_data': {"respond_with_form": [{
                     "type": "choices",
-                    "question": "Are you ready?",
-                    "choices": ['Yes!', 'Of course', 'Bring it on.', 'Born ready']
+                    "question": "Does this make sense?",
+                    "choices": ['Yes!', 'Yup, sounds great', 'Bring it on.']
                 }]}
             }
             self.mturk_agent.observe(ad)
