@@ -23,8 +23,42 @@ class ContextEvaluationOnboardWorld(MTurkOnboardWorld):
         self.num_incorrect = 0
         self.options = ['A', 'B', 'C', 'D']  # Always use all 4 answer-options for practice questions.
         self.prompt_types = [opt['prompt_type']]
-        self.wrong_threshold = .25
+        assert len(self.prompt_types) == 1, 'Using multiple prompt_types not yet supported.'
+
+        self.wrong_threshold = {
+            'question': .25,
+            'quote and question': .25,
+            'question and quotes': .25,
+            'quotes and question': .25,
+            'passage and question': 0.,
+        }[self.prompt_types[0]]
         self.test_questions = {
+            'question': [
+                {
+                    'text': 'When Fred opens his pantry, he is surprised the banana is not colored _.\n\n' +
+                            'A. Gray-ish blue\n' +
+                            'B. Purple and pink\n' +
+                            'C. Green or yellow\n' +
+                            'D. Plain white',
+                    'answer': 'C',
+                },
+                {
+                    'text': 'He who considers himself to be better and more important than others is likely to _.\n\n' +
+                            'A. have his head in the clouds\n' +
+                            'B. be easy to deal with\n' +
+                            'C. have "common sense"\n' +
+                            'D. have a "big head"',
+                    'answer': 'D',
+                },
+                {
+                    'text': 'What does Alan\'s grandfather do every Sunday?\n\n' +
+                            'A. He hosts crazy parties.\n' +
+                            'B. He studies for the medical school entrance exam.\n' +
+                            'C. He flies to Hawaii and back.\n' +
+                            'D. He goes to church with his wife.',
+                    'answer': 'D',
+                },
+            ],
             'quote and question': [
                 {
                     'text': '"Wow, I never knew a banana could be that color."\n\n' +
@@ -51,32 +85,6 @@ class ContextEvaluationOnboardWorld(MTurkOnboardWorld):
                             'B. In every school there is a "top" crowd that sets the pace.\n' +
                             'C. At one time or another you probably did something you knew to be wrong.\n'
                             'D. It is a mistake to follow the "top" crowd blindly.',
-                    'answer': 'D',
-                },
-            ],
-            'question': [
-                {
-                    'text': 'When Fred opens his pantry, he is surprised the banana is not colored _.\n\n' +
-                            'A. Gray-ish blue\n' +
-                            'B. Purple and pink\n' +
-                            'C. Green or yellow\n' +
-                            'D. Plain white',
-                    'answer': 'C',
-                },
-                {
-                    'text': 'He who considers himself to be better and more important than others is likely to _.\n\n' +
-                            'A. have his head in the clouds\n' +
-                            'B. be easy to deal with\n' +
-                            'C. have "common sense"\n' +
-                            'D. have a "big head"',
-                    'answer': 'D',
-                },
-                {
-                    'text': 'What does Alan\'s grandfather do every Sunday?\n\n' +
-                            'A. He hosts crazy parties.\n' +
-                            'B. He studies for the medical school entrance exam.\n' +
-                            'C. He flies to Hawaii and back.\n' +
-                            'D. He goes to church with his wife.',
                     'answer': 'D',
                 },
             ],
@@ -164,12 +172,12 @@ Since the quotes weren't very helpful, you'd have to guess based on her name onl
 
 Just to give you an idea, the quotes were from this passage:
 
-Amy Smith, a famous dancer from the U.S., had to have her right leg cut after a car accident. She was also cut off on her career road.\nThough the accident brought her bright career to a stop, she didn't give up. In the painful months that followed, Amy met a doctor who developed a man-made leg for her. So strongly, she wanted to go back to dancing. Amy believed in herself and she thought she could realize her dream.\n\nAfter every public recital, she would ask her dad about her performance. \"You still have a long way to go\" was the answer she used to get in return. In January 1984, Amy made a historic comeback by giving a public recital in Los Angeles. She performed in such a great manner that it moved everyone to tears. That evening when she asked her dad the usual question, he didn't say anything. He just touched her feet as a praise. Amy's comeback was so moving that a film producer decided to make the story into a hit film.\n\nWhen someone asked Amy how she had managed to dance again, she said quite simply, \"You don't need feet to dance.\"  Nothing is impossible in this world. If you have the will to win, you can achieve anything.
+Amy Smith, a famous dancer from the U.S., had to have her right leg cut after a car accident. She was also cut off on her career road.\nThough the accident brought her bright career to a stop, she didn't give up. In the painful months that followed, Amy met a doctor who developed a man-made leg for her. So strongly, she wanted to go back to dancing. Amy believed in herself and she thought she could realize her dream.\n\nAfter every public recital, she would ask her dad about her performance. \"You still have a long way to go\" was the answer she used to get in return. In January 1984, Amy made a historic comeback by giving a public recital in Los Angeles. She performed in such a great manner that it moved everyone to tears. That evening when she asked her dad the usual question, he didn't say anything. He just touched her feet as a praise. Amy's comeback was so moving that a film producer decided to make the story into a hit film.\n\nWhen someone asked Amy how she had managed to dance again, she said quite simply, \"You don't need feet to dance!\"  Nothing is impossible in this world. If you have the will to win, you can achieve anything.
                     """,
                 },
                 {
                     'text': """
-According to the passage, the key responsibilities include   _  .
+According to the passage, the key responsibilities include _.
 
 Quote: “* Participate in and contribute to the budget and business planning cycle.”
 A: taking charge of production work
@@ -218,6 +226,202 @@ The Last Supper is regarded as one of the supreme masterpieces in the whole fiel
                     """,
                 },
             ],
+            'quotes and question': [
+                {
+                    'text': """
+You need LIFE WATERR when you feel thirsty after working in the office a long time. ... It\'s purified H2O straight from the Pacific Ocean. ... For only a little money, you will feel great! ... * If you are taking any special medication or have stomach problems, please check with the doctor before buying LIFE WATERR.
+
+Which is TRUE about LIFE WATERR?
+
+A: It can't be sold without a doctor.
+B: It's also good for stomach problems.
+C: It's not expensive.
+D: It's made from spring water in the mountains.
+                    """,
+                    'answer': 'C',
+                    'explanation': """
+The quoted passage states that "For only a little money, you will feel great again!", which directly supports C. The quotes only indirectly support other answers.
+
+Just to give you an idea, the quotes were from this passage:
+
+You need LIFE WATERR when you feel thirsty after working in the office a long time.\nIt\'s purified H2O straight from the Pacific Ocean.\nFor only a little money, you will feel great again!\nGet LIFE WATERR at the stores near your house NOW!\n* If you are taking any special medication or have stomach problems, please check with the doctor before buying LIFE WATERR.
+                    """,
+                },
+                {
+                    'text': """
+Woman: How do you like your new job? ... Man:   I like a small company because it's more exciting. ... Woman: You see, small businesses have a common problem: only the two or three people who run it can make decisions, and the employees may not be very happy because they can't make decisions. ... Man:   But large companies also have a common problem, so many people are making decisions that sometimes it is a waste of time and money.
+
+What does the man prefer to work for?
+
+A: A company of his own.
+B: A small company.
+C: A large company.
+D: He prefers not to work.
+                    """,
+                    'answer': 'B',
+                    'explanation': """
+B is correct, as the quoted sentences support that the man likes working at a small company and not at a large company.   
+
+Just to give you an idea, the quotes were from this passage:
+
+"Woman: How do you like your new job?",
+"Man:   I like it very much. This is a nice company to work for.",
+"Woman: You worked for a large company before, didn't you?",
+"Man:   Yes, I did. But I prefer a small company.",
+"Woman: Is it really different?",
+"Man:   Oh, yes. It's much different. I like a small company because it's more exciting.",
+"Woman: You mean a large company is boring to work for?",
+"Man:   No, it's not boring. But a large company has too many people and because it is so big that two or three people couldn't possibly make all the important decisions.",
+"Woman: You see, small businesses have a common problem: only the two or three people who run it can make decisions, and the employees may not be very happy because they can't make decisions.",
+"Man:   But large companies also have a common problem, so many people are making decisions that sometimes it is a waste of time and money.",
+"Woman: Well, I guess there are problems everywhere.",
+"Man:   Yeah, but I still prefer working for a small company. It's more interesting and I'll keep more opportunities."
+                    """,
+                },
+                {
+                    'text': """
+“. ... Nothing is impossible in this world. ... ? ... .”
+
+Amy Smith is an _ dancer.
+
+A: Asian
+B: American
+C: Argentinian
+D: Nigerian
+                    """,
+                    'answer': 'B',
+                    'explanation': """
+Since the quotes weren't very helpful, you'd have to guess based on her name only.
+
+Just to give you an idea, the quotes were from this passage:
+
+Amy Smith, a famous dancer from the U.S., had to have her right leg cut after a car accident. She was also cut off on her career road.\nThough the accident brought her bright career to a stop, she didn't give up. In the painful months that followed, Amy met a doctor who developed a man-made leg for her. So strongly, she wanted to go back to dancing. Amy believed in herself and she thought she could realize her dream.\n\nAfter every public recital, she would ask her dad about her performance. \"You still have a long way to go\" was the answer she used to get in return. In January 1984, Amy made a historic comeback by giving a public recital in Los Angeles. She performed in such a great manner that it moved everyone to tears. That evening when she asked her dad the usual question, he didn't say anything. He just touched her feet as a praise. Amy's comeback was so moving that a film producer decided to make the story into a hit film.\n\nWhen someone asked Amy how she had managed to dance again, she said quite simply, \"You don't need feet to dance!\"  Nothing is impossible in this world. If you have the will to win, you can achieve anything.
+                    """,
+                },
+                {
+                    'text': """
+* Conduct market and product research; maintain data base by identifying and gathering marketing information. ... * Participate in and contribute to the budget and business planning cycle. ... * Good at day to day lead and coach.
+
+According to the passage, the key responsibilities include _.
+
+A: taking charge of production work
+B: working on training programs
+C: maintaining data base of marketing information.
+D: serving as a network technician
+                    """,
+                    'answer': 'C',
+                    'explanation': """
+The role lists a responsibility to "maintain data base by identifying and gathering marketing information," which directly supports answer C. The quotes only support other answers indirectly.
+
+Just to give you an idea, the quotes were from this passage:
+
+Key responsibilities:\n* Manage the whole marketing activities, i.e. brand building, market research and integrated-marketing functions.\n*  Develop and evaluate brand activities including the development of promotional activities, advertising and merchandising.\n*  Obtain market share by developing marketing plans and programs for key brands.\n*  Conduct market and product research; maintain data base by identifying and gathering marketing information.\n*  Understand market/competitor intelligence and cooperate with the sales teams in developing the appropriate marketing strategies.\n*  Keep contacts and exchange of information with regional operations on marketing issues.\n*  Participate in and contribute to the budget and business planning cycle.\n*  Supervise the project to establish company websites.\n* Complete marketing department operational requirements by scheduling and assigning employees; develop, maintain, evaluate and lead the marketing team of pan-China.\n*  Serve as a member of the senior management team providing input and direction on the company's strategic and operational goals and objects.\nRequirements:\n*  University degree or above, MBA is a plus.\n*  At least Bi-lingual: Chinese and English, any other language is a plus.\n*  Strong wits and oral communication skills; analytic skill; active listening.\n*  Good at day to day lead and coach.\n*  More than 10 years working experience in sales and marketing of _ industry, including at least 5 years management experience; professional in marketing function.\nEmployer introduction:\nSummergate was established in 1999 to import, distribute and market some of the world's best wines to the Chinese market. Today Summergate represents more than 60 wineries from 12 countries around the world.\nWith offices in Beijing, Shanghai; Shenzhen, Guangzhou, Macau and now Hong Kong, Summergate services the entire China market. We distribute and market our brands to all the major food and beverage operators in China, establishing solid business partnerships with national hotel groups as well as all China retail chains and fine dining western and Chinese restaurants.
+                    """,
+                },
+                {
+                    'text': """
+This inactivity aroused the anger of the fussy Prior, the head of the church, who belonged to the large group of those who believed that the busier a man seems, the more he accomplishes; and so he tried to find fault with the idle painter. ... Leonardo was slightly unhappy and explained to somebody else that there is a great difference between the work of the creative artist and the stonemason. ... The creative artist needs time for contemplation; he may be busiest when his hands are idlest. ... But he would look no further; if none came his way, he would be satisfied to take Prior as a model for Judas. ...
+
+Why did the Prior complain about the delay?
+
+A: Because he knew that genius might be busiest when seemingly idlest.
+B: Because he liked the work of a stonemason.
+C: Because he was eager to be taken as a model for Judas.
+D: Because he thought that the painter idled most of the hours.
+                    """,
+                    'answer': 'D',
+                    'explanation': """
+The first quoted sentence most directly answers the question, and it supports answer D.
+
+Just to give you an idea, the quotes were from this passage:
+
+The Last Supper is regarded as one of the supreme masterpieces in the whole field of pictorial art. Tradition has it that Leonardo Da Vinci worked for ten years upon the painting, the monks in the church annoyed at the delay. It was said that Leonardo often painted continuously from dawn to night without eating his meals. But at other times he spent hours before the picture, lost in contemplation, examining, comparing, and measuring his figures.\n\nThis inactivity aroused the anger of the fussy Prior, the head of the church, who belonged to the large group of those who believed that the busier a man seems, the more he accomplishes; and so he tried to find fault with the idle  painter. Leonardo was slightly unhappy and explained to somebody else that there is a great difference between the work of the creative artist and the stonemason . The creative artist needs time for contemplation; he may be busiest when his hands are idlest. Just now he needed two heads to complete the picture: that of Christ, for which no model on earth could be found, for where was the man to be found whose face would express the strength, and beauty, and tenderness, and deep sorrow of the Christ; then he also needed a head of Judas, and that was hard to find as well, for where was the man whose face could express the meanness of that base traitor . But he would look no further; if none came his way, he would be satisfied to take Prior as a model for Judas. This threat silenced the angry Prior, who quite naturally had no desire to pass to descendants in such a fashion.
+                    """,
+                },
+            ],
+            'passage and question': [
+                {
+                    'text': """
+You need LIFE WATERR when you feel thirsty after working in the office a long time.\nIt\'s purified H2O straight from the Pacific Ocean.\nFor only a little money, you will feel great again!\nGet LIFE WATERR at the stores near your house NOW!\n* If you are taking any special medication or have stomach problems, please check with the doctor before buying LIFE WATERR.
+
+Which is TRUE about LIFE WATERR?
+
+A: It can't be sold without a doctor.
+B: It's also good for stomach problems.
+C: It's not expensive.
+D: It's made from spring water in the mountains.
+                    """,
+                    'answer': 'C',
+                    'explanation': """The passage states that "For only a little money, you will feel great again!", which directly supports C. The passage only indirectly supports other answers.""",
+                },
+                {
+                    'text': """
+"Woman: How do you like your new job?",
+"Man:   I like it very much. This is a nice company to work for.",
+"Woman: You worked for a large company before, didn't you?",
+"Man:   Yes, I did. But I prefer a small company.",
+"Woman: Is it really different?",
+"Man:   Oh, yes. It's much different. I like a small company because it's more exciting.",
+"Woman: You mean a large company is boring to work for?",
+"Man:   No, it's not boring. But a large company has too many people and because it is so big that two or three people couldn't possibly make all the important decisions.",
+"Woman: You see, small businesses have a common problem: only the two or three people who run it can make decisions, and the employees may not be very happy because they can't make decisions.",
+"Man:   But large companies also have a common problem, so many people are making decisions that sometimes it is a waste of time and money.",
+"Woman: Well, I guess there are problems everywhere.",
+"Man:   Yeah, but I still prefer working for a small company. It's more interesting and I'll keep more opportunities."
+
+What does the man prefer to work for?
+
+A: A company of his own.
+B: A small company.
+C: A large company.
+D: He prefers not to work.
+                    """,
+                    'answer': 'B',
+                    'explanation': """The man states he finds a small company more exciting and that he is frustrated that large companies have too many people.""",
+                },
+                {
+                    'text': """
+Amy Smith, a famous dancer from the U.S., had to have her right leg cut after a car accident. She was also cut off on her career road.\nThough the accident brought her bright career to a stop, she didn't give up. In the painful months that followed, Amy met a doctor who developed a man-made leg for her. So strongly, she wanted to go back to dancing. Amy believed in herself and she thought she could realize her dream.\n\nAfter every public recital, she would ask her dad about her performance. \"You still have a long way to go\" was the answer she used to get in return. In January 1984, Amy made a historic comeback by giving a public recital in Los Angeles. She performed in such a great manner that it moved everyone to tears. That evening when she asked her dad the usual question, he didn't say anything. He just touched her feet as a praise. Amy's comeback was so moving that a film producer decided to make the story into a hit film.\n\nWhen someone asked Amy how she had managed to dance again, she said quite simply, \"You don't need feet to dance!\"  Nothing is impossible in this world. If you have the will to win, you can achieve anything.
+
+Amy Smith is an _ dancer.
+
+A: Asian
+B: American
+C: Argentinian
+D: Nigerian
+                    """,
+                    'answer': 'B',
+                    'explanation': """Amy is "a famous dancer from the U.S.," so she must be American.""",
+                },
+                {
+                    'text': """
+Key responsibilities:\n* Manage the whole marketing activities, i.e. brand building, market research and integrated-marketing functions.\n*  Develop and evaluate brand activities including the development of promotional activities, advertising and merchandising.\n*  Obtain market share by developing marketing plans and programs for key brands.\n*  Conduct market and product research; maintain data base by identifying and gathering marketing information.\n*  Understand market/competitor intelligence and cooperate with the sales teams in developing the appropriate marketing strategies.\n*  Keep contacts and exchange of information with regional operations on marketing issues.\n*  Participate in and contribute to the budget and business planning cycle.\n*  Supervise the project to establish company websites.\n* Complete marketing department operational requirements by scheduling and assigning employees; develop, maintain, evaluate and lead the marketing team of pan-China.\n*  Serve as a member of the senior management team providing input and direction on the company's strategic and operational goals and objects.\nRequirements:\n*  University degree or above, MBA is a plus.\n*  At least Bi-lingual: Chinese and English, any other language is a plus.\n*  Strong wits and oral communication skills; analytic skill; active listening.\n*  Good at day to day lead and coach.\n*  More than 10 years working experience in sales and marketing of _ industry, including at least 5 years management experience; professional in marketing function.\nEmployer introduction:\nSummergate was established in 1999 to import, distribute and market some of the world's best wines to the Chinese market. Today Summergate represents more than 60 wineries from 12 countries around the world.\nWith offices in Beijing, Shanghai; Shenzhen, Guangzhou, Macau and now Hong Kong, Summergate services the entire China market. We distribute and market our brands to all the major food and beverage operators in China, establishing solid business partnerships with national hotel groups as well as all China retail chains and fine dining western and Chinese restaurants.
+
+According to the passage, the key responsibilities include _.
+
+A: taking charge of production work
+B: working on training programs
+C: maintaining data base of marketing information.
+D: serving as a network technician
+                    """,
+                    'answer': 'C',
+                    'explanation': """The role lists a responsibility to "maintain data base by identifying and gathering marketing information," which directly supports answer C. Other answers only have indirect support.""",
+                },
+                {
+                    'text': """
+The Last Supper is regarded as one of the supreme masterpieces in the whole field of pictorial art. Tradition has it that Leonardo Da Vinci worked for ten years upon the painting, the monks in the church annoyed at the delay. It was said that Leonardo often painted continuously from dawn to night without eating his meals. But at other times he spent hours before the picture, lost in contemplation, examining, comparing, and measuring his figures.\n\nThis inactivity aroused the anger of the fussy Prior, the head of the church, who belonged to the large group of those who believed that the busier a man seems, the more he accomplishes; and so he tried to find fault with the idle  painter. Leonardo was slightly unhappy and explained to somebody else that there is a great difference between the work of the creative artist and the stonemason . The creative artist needs time for contemplation; he may be busiest when his hands are idlest. Just now he needed two heads to complete the picture: that of Christ, for which no model on earth could be found, for where was the man to be found whose face would express the strength, and beauty, and tenderness, and deep sorrow of the Christ; then he also needed a head of Judas, and that was hard to find as well, for where was the man whose face could express the meanness of that base traitor . But he would look no further; if none came his way, he would be satisfied to take Prior as a model for Judas. This threat silenced the angry Prior, who quite naturally had no desire to pass to descendants in such a fashion.
+
+Why did the Prior complain about the delay?
+
+A: Because he knew that genius might be busiest when seemingly idlest.
+B: Because he liked the work of a stonemason.
+C: Because he was eager to be taken as a model for Judas.
+D: Because he thought that the painter idled most of the hours.
+                    """,
+                    'answer': 'D',
+                    'explanation': """The answer is contained in the sentence \"This inactivity aroused the anger of the fussy Prior... who believed that the busier a man seems, the more he accomplishes.\"""",
+                },
+            ],
         }
 
         for prompt_type in self.test_questions.keys():
@@ -226,7 +430,6 @@ The Last Supper is regarded as one of the supreme masterpieces in the whole fiel
             # random.shuffle(self.test_questions[prompt_type])
 
     def parley(self):
-        assert len(self.prompt_types) == 1, 'Using multiple prompt_types not yet supported.'
         prompt_type = self.prompt_types[0]
         num_test = len(self.test_questions[prompt_type])
         max_incorrect = int(math.floor(num_test * self.wrong_threshold))

@@ -50,28 +50,44 @@ class ContextEvaluationWorld(MTurkTaskWorld):
 
         # Prompt type differences
         self.prompt_types = [opt['prompt_type']]
+        assert len(self.prompt_types) == 1, 'Using multiple prompt_types not yet supported.'
+        self.prompt_type_description = {
+            'question': 'just the questions and answers',
+            'quote and question': 'just a short quote from the passage',
+            'question and quotes': 'just a few quotes from the passage',
+            'quotes and question': 'just a few quotes from the passage',
+            'passage and question': 'the passage',
+        }
         self.accuracy_bonus_threshold = {
             'dream': {
-                'quote and question': .6,
                 'question': .5,
+                'quote and question': .6,
                 'question and quotes': .8,
+                'quotes and question': .8,
+                'passage and question': .945,
             },
             'race': {
-                'quote and question': .55,
                 'question': .47,
+                'quote and question': .55,
                 'question and quotes': .8,
+                'quotes and question': .8,
+                'passage and question': .945,
             },
         }[self.dataset]
         self.median_sample_ms_reject_threshold = {
             'dream': {
-                'quote and question': 4500,
                 'question': 4000,
+                'quote and question': 4500,
                 'question and quotes': 7000,
+                'quotes and question': 7000,
+                'passage and question': 10500,
             },
             'race': {
-                'quote and question': 7000,
                 'question': 6000,
+                'quote and question': 7000,
                 'question and quotes': 10000,
+                'quotes and question': 10000,
+                'passage and question': 15000,
             },
         }[self.dataset]
         self.response_freq_reject_threshold = {
@@ -190,18 +206,7 @@ class ContextEvaluationWorld(MTurkTaskWorld):
                 # Show accuracy
                 prompt_type_accuracy = int(round((100. * num_correct_for_prompt_type) /
                                                  self.num_collected_on_labeled[prompt_type]))
-                outcome_text += ' You got ' + str(prompt_type_accuracy) + '% of questions right'
-                if prompt_type == 'question':
-                    outcome_text += ' with just the questions and options!'
-                elif prompt_type == 'quote and question':
-                    outcome_text += ' with just a short quote from the passage!'
-                else:
-                    outcome_text += '!'
-
-                # Congratulate if they beat random
-                random_accuracy = int(round(100. / len(self.options)))
-                if prompt_type_accuracy > (random_accuracy + 10):
-                    outcome_text += ' That\'s ' + str(prompt_type_accuracy - random_accuracy) + '% better than random guessing. Great work.'
+                outcome_text += ' You got ' + str(prompt_type_accuracy) + '% right with ' + self.prompt_type_description[prompt_type] + '.'
             self.mturk_agent.observe({
                 'episode_done': False,
                 'id': 'System',
@@ -251,54 +256,80 @@ class ContextEvaluationWorld(MTurkTaskWorld):
             sample = self.task.act()
             sample['debate_mode'] = self.sample_debate_modes[self.num_collected] if (self.sample_debate_modes is not None) else None
 
-            # Question-only evaluation
-            if 'question' in self.prompt_types:
-                prompt_text = '\n'.join([sample['question'] + '\n'] + sample['options'])
-                question_response = self.prompt_and_receive_response(prompt_text, 'question', sample)
-                if question_response is None:
-                    return
+            for prompt_type in self.prompt_types:
+                if prompt_type == 'question':
+                    prompt_text = '\n'.join([sample['question'] + '\n'] + sample['options'])
+                    question_response = self.prompt_and_receive_response(prompt_text, 'question', sample)
+                    if question_response is None:
+                        return
+                elif prompt_type == 'question and quotes':
+                    prompt_text = sample['question']
+                    sample['sentences_chosen'] = []
+                    for i, debate_mode in enumerate(self.possible_debate_modes):
+                        evaluation_sample = self.evaluation_data[debate_mode][sample['qid']]
+                        sentences_chosen = [evaluation_sample['sentences_chosen'][0]]  # NB: Always first sentence only
+                        sentences_chosen = self._format_sentences(sentences_chosen)
+                        sentences_chosen = '\n'.join(sentences_chosen)
+                        prompt_text += '\n'
+                        prompt_text += '\nQuote: “' + sentences_chosen + '”'
+                        prompt_text += '\n' + sample['options'][i]
+                        sample['sentences_chosen'].append(sentences_chosen)
+                    sample['sentences_chosen'] = '\n'.join(sample['sentences_chosen'])
 
-            # Question-only evaluation
-            if 'question and quotes' in self.prompt_types:
-                prompt_text = sample['question']
-                sample['sentences_chosen'] = []
-                for i, debate_mode in enumerate(self.possible_debate_modes):
-                    evaluation_sample = self.evaluation_data[debate_mode][sample['qid']]
-                    sentences_chosen = [evaluation_sample['sentences_chosen'][0]]  # NB: Always picks first agent only
+                    question_and_quotes_response = self.prompt_and_receive_response(
+                        prompt_text, 'question and quotes', sample)
+                    if question_and_quotes_response is None:
+                        return
+                elif prompt_type == 'quotes and question':
+                    no_spaces_passage = sample['passage'].replace(' ', '')
+                    sentence_chosen_to_passage_index = {}
+                    for i, debate_mode in enumerate(self.possible_debate_modes):
+                        evaluation_sample = self.evaluation_data[debate_mode][sample['qid']]
+                        sentences_chosen = [evaluation_sample['sentences_chosen'][0]]  # NB: Always first sentence only
+                        sentences_chosen_formatted = self._format_sentences(sentences_chosen)
+                        for sentence_chosen, sentence_chosen_formatted in zip(sentences_chosen, sentences_chosen_formatted):
+                            no_spaces_sentence_chosen = sentence_chosen.replace(' ', '')
+                            if no_spaces_sentence_chosen in no_spaces_passage:
+                                passage_index = no_spaces_passage.index(no_spaces_sentence_chosen)
+                            else:
+                                passage_index = float('inf')
+                                print('Couldn\'t find sentence:', sentence_chosen_formatted, '\nin passage:', sample['passage'])
+                            sentence_chosen_to_passage_index[sentence_chosen_formatted] = passage_index
+                    sorted_sentences_chosen = sorted(sentence_chosen_to_passage_index, key=sentence_chosen_to_passage_index.get)
+                    sample['sentences_chosen'] = ' ... '.join(sorted_sentences_chosen)
+
+                    prompt_text = sample['sentences_chosen'] + '\n\n' + '\n'.join([sample['question'] + '\n'] + sample['options'])
+                    quotes_and_question_response = self.prompt_and_receive_response(
+                        prompt_text, 'question and quotes', sample)
+                    if quotes_and_question_response is None:
+                        return
+                elif prompt_type == 'quote and question':
+                    # Get sentences chosen
+                    evaluation_sample = self.evaluation_data[sample['debate_mode']][sample['qid']]
+                    sentences_chosen = [evaluation_sample['sentences_chosen'][0]]  # NB: Always first agent only
                     sentences_chosen = self._format_sentences(sentences_chosen)
+
+                    # Format prompt
                     sentences_chosen = '\n'.join(sentences_chosen)
-                    prompt_text += '\n'
-                    prompt_text += '\nQuote: “' + sentences_chosen + '”'
-                    prompt_text += '\n' + sample['options'][i]
-                    sample['sentences_chosen'].append(sentences_chosen)
-                sample['sentences_chosen'] = '\n'.join(sample['sentences_chosen'])
+                    prompt_text = '\n'.join([sample['question'] + '\n'] + sample['options'])
+                    prompt_text = sentences_chosen + '\n\n' + prompt_text
+                    sample['sentences_chosen'] = sentences_chosen
 
-                question_and_answer_quotes_response = self.prompt_and_receive_response(
-                    prompt_text, 'question and quotes', sample)
-                if question_and_answer_quotes_response is None:
-                    return
-
-            # Context+Question evaluation
-            if 'quote and question' in self.prompt_types:
-                # Get sentences chosen
-                evaluation_sample = self.evaluation_data[sample['debate_mode']][sample['qid']]
-                sentences_chosen = [evaluation_sample['sentences_chosen'][0]]  # NB: Always picks first agent only
-                sentences_chosen = self._format_sentences(sentences_chosen)
-
-                # Format prompt
-                sentences_chosen = '\n'.join(sentences_chosen)
-                prompt_text = '\n'.join([sample['question'] + '\n'] + sample['options'])
-                prompt_text = sentences_chosen + '\n\n' + prompt_text
-                sample['sentences_chosen'] = sentences_chosen
-
-                quote_and_question_response = self.prompt_and_receive_response(prompt_text, 'quote and question', sample)
-                if quote_and_question_response is None:
-                    return
-                if 'question' in self.prompt_types:
-                    self.num_changed_responses += (quote_and_question_response != question_response)
-                if sample['debate_mode'] is not None:
-                    self.num_debate_mode_responses += (quote_and_question_response ==
-                                                       self.debate_mode_to_option[sample['debate_mode']])
+                    quote_and_question_response = self.prompt_and_receive_response(prompt_text, 'quote and question', sample)
+                    if quote_and_question_response is None:
+                        return
+                    if 'question' in self.prompt_types:
+                        self.num_changed_responses += (quote_and_question_response != question_response)
+                    if sample['debate_mode'] is not None:
+                        self.num_debate_mode_responses += (quote_and_question_response ==
+                                                           self.debate_mode_to_option[sample['debate_mode']])
+                elif prompt_type == 'passage and question':
+                    passage_and_question_response = self.prompt_and_receive_response(
+                        sample['text'], 'passage and question', sample)
+                    if passage_and_question_response is None:
+                        return
+                else:
+                    raise NotImplementedError('Prompt Type:', prompt_type)
 
             # Terminate episode (if applicable)
             self.num_collected += 1
@@ -341,7 +372,7 @@ class ContextEvaluationWorld(MTurkTaskWorld):
                     answer_feedback_response, answer_feedback_duration = self.get_response_and_duration({
                         'episode_done': False,
                         'id': 'System',
-                        'text': 'The correct answer was ' + sample['eval_labels'][0] + '. It may have been too tough to guess, but feel free to review the previous question and continue when you are ready.',
+                        'text': 'The correct answer was ' + sample['eval_labels'][0] + '. Feel free to review the previous question and continue when you are ready.',
                         'task_data': {'respond_with_form': [{
                             'type': 'choices',
                             'question': 'Ready to continue?',
