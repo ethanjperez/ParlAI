@@ -63,22 +63,22 @@ class ContextEvaluationWorld(MTurkTaskWorld):
             'quote and question': .5,
             'question and quotes': 1.0,
             'quotes and question': 1.0,
-            'passage and question': .5,
+            'passage and question': 1.0,
         }[self.prompt_types[0]]
         self.accuracy_bonus_threshold = {
             'dream': {
                 'question': .5,
                 'quote and question': .6,
                 'question and quotes': .8,
-                'quotes and question': .8,
-                'passage and question': .945,
+                'quotes and question': .85,
+                'passage and question': .95,
             },
             'race': {
                 'question': .47,
                 'quote and question': .55,
                 'question and quotes': .8,
-                'quotes and question': .8,
-                'passage and question': .945,
+                'quotes and question': .85,
+                'passage and question': .9,
             },
         }[self.dataset]
         self.median_sample_ms_reject_threshold = {
@@ -94,7 +94,7 @@ class ContextEvaluationWorld(MTurkTaskWorld):
                 'quote and question': 7000,
                 'question and quotes': 10000,
                 'quotes and question': 10000,
-                'passage and question': 10000,
+                'passage and question': 20000,
             },
         }[self.dataset]
         self.response_freq_reject_threshold = {
@@ -270,7 +270,7 @@ class ContextEvaluationWorld(MTurkTaskWorld):
             for prompt_type in self.prompt_types:
                 if prompt_type == 'question':
                     prompt_text = '\n'.join([sample['question'] + '\n'] + sample['options'])
-                    question_response = self.prompt_and_receive_response(prompt_text, 'question', sample)
+                    question_response = self.prompt_and_receive_response(prompt_text, prompt_type, sample)
                     if question_response is None:
                         return
                 elif prompt_type == 'question and quotes':
@@ -288,7 +288,7 @@ class ContextEvaluationWorld(MTurkTaskWorld):
                     sample['sentences_chosen'] = '\n'.join(sample['sentences_chosen'])
 
                     question_and_quotes_response = self.prompt_and_receive_response(
-                        prompt_text, 'question and quotes', sample)
+                        prompt_text, prompt_type, sample)
                     if question_and_quotes_response is None:
                         return
                 elif prompt_type == 'quotes and question':
@@ -311,7 +311,7 @@ class ContextEvaluationWorld(MTurkTaskWorld):
 
                     prompt_text = '“' + sample['sentences_chosen'] + '”\n\n' + '\n'.join([sample['question'] + '\n'] + sample['options'])
                     quotes_and_question_response = self.prompt_and_receive_response(
-                        prompt_text, 'question and quotes', sample)
+                        prompt_text, prompt_type, sample)
                     if quotes_and_question_response is None:
                         return
                 elif prompt_type == 'quote and question':
@@ -326,7 +326,7 @@ class ContextEvaluationWorld(MTurkTaskWorld):
                     prompt_text = sentences_chosen + '\n\n' + prompt_text
                     sample['sentences_chosen'] = sentences_chosen
 
-                    quote_and_question_response = self.prompt_and_receive_response(prompt_text, 'quote and question', sample)
+                    quote_and_question_response = self.prompt_and_receive_response(prompt_text, prompt_type, sample)
                     if quote_and_question_response is None:
                         return
                     if 'question' in self.prompt_types:
@@ -338,7 +338,7 @@ class ContextEvaluationWorld(MTurkTaskWorld):
                     passage_text = sample['text'].split('\n')
                     prompt_text = '\n' + '\n'.join(self._format_sentences(passage_text))
                     passage_and_question_response = self.prompt_and_receive_response(
-                        prompt_text, 'passage and question', sample)
+                        prompt_text, prompt_type, sample)
                     if passage_and_question_response is None:
                         return
                 else:
@@ -518,7 +518,6 @@ class ContextEvaluationWorld(MTurkTaskWorld):
             self.mturk_agent.reject_work('effort')
             if not self.is_sandbox:
                 self.mturk_agent.mturk_manager.soft_block_worker(self.mturk_agent.worker_id)
-                # self.mturk_agent.block_worker('effort')
         elif len(self.reject_reasons) > 0:
             self.mturk_agent.reject_work('effort')
         else:

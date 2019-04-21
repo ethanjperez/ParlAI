@@ -17,10 +17,10 @@ task_configs = {
         'question_splits': 5,  # max Q's/passage in 'datatype' field directory
     },
     'race': {
-        'datatype': 'dev.num_passages=13',
+        'datatype': 'test.human_eval',
         'num_conversations': 100,
         'num_options': 4,
-        'unique_qual_name': 'tfidf4',
+        'unique_qual_name': 'race',
     },
     'dream': {
         'datatype': 'test.num_questions=100',
@@ -149,7 +149,7 @@ task_configs = {
     },
     'quotes and question': {
         # 'evaluation_data_dir': '../allennlp/eval/race/race.ⅱ.m=sl-sents.i.lr=2e-5.bsz=12.n=1.x=0.5.c=concat/dev.num_passages=13',
-        'evaluation_data_dir': '../allennlp/eval/dream/sl/test',
+        'evaluation_data_dir': '../allennlp/eval/dream/fasttext.o/test',
         'num_conversations': 25,
         'reward': 1.5,  # RACE: 3.0, 22m, 1.5 bonus (or change reward/bonus). DREAM: 1.5, 11m, 1.5 bonus (vs. 2.0, 11m, 1.0, with lower bonus) (vs. 1.5, 11m, .75, with shorter qualifier)
         'assignment_duration_in_seconds': 5400,
@@ -186,18 +186,18 @@ task_configs = {
     'passage and question': {
         'evaluation_data_dir': None,
         'num_conversations': 25,
-        'reward': 1.5,  # DREAM: 1.5, 11m, .75?, RACE: 3.0, 22m, 1.5?
+        'reward': 3.17,  # DREAM: 1.5, 11m, 1.5, RACE: 3.0, 22m, 3.0?
         'assignment_duration_in_seconds': 5400,
         'hit_description': 'How well can you answer passage comprehension questions?',
         'task_description': """
             <b>Your Goal</b>: See how well you can answer reading comprehension exam, multiple-choice questions.
-            You\'ll get a bonus if you do well!<br><br>
+            You\'ll be paid double if you do well!<br><br>
             
             <b>Questions in HIT</b>: 20<br>
-            <b>Time</b>: 11 minutes<br>
-            <b>Bonus</b>: $.75 for exceeding average worker accuracy<br>
+            <b>Time</b>: 23 minutes<br>
+            <b>Bonus</b>: $3.17 for exceeding average worker accuracy<br>
             <b>Payout</b>: Immediate<br>
-            <b>Qualifying</b>: Must pass 5 trial questions first. We have the right to reject work for workers who pass the qualifier but provide spam on the real HIT.<br><br>
+            <b>Qualifying</b>: Must pass 4 trial questions first. We have the right to reject work for workers who pass the qualifier but provide spam on the real HIT.<br><br>
             
             <b>------------------- EXAMPLE -------------------</b> <br><br>
             <b>Passage and Question</b>:<br>

@@ -29,7 +29,7 @@ class ContextEvaluationOnboardWorld(MTurkOnboardWorld):
             'question': .25,
             'quote and question': .25,
             'question and quotes': .25,
-            'quotes and question': .25,
+            'quotes and question': 0.,
             'passage and question': 0.,
         }[self.prompt_types[0]]
         self.test_questions = {
