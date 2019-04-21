@@ -73,7 +73,7 @@ task_configs = {
         """
     },
     'quote and question': {
-        'evaluation_data_dir': '../allennlp/eval/dream/sl-t/test',
+        'evaluation_data_dir': '../allennlp/eval/dream/sl/test',
         'reward': 1.12,  # RACE: 1.5, 11m, .75 bonus. DREAM: 1.12, 8m, .56 bonus
         'assignment_duration_in_seconds': 2700,
         'hit_description': 'Can you answer passage comprehension questions using just a quote?',

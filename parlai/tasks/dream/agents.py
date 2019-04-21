@@ -28,11 +28,12 @@ class IndexTeacher(FixedDialogTeacher):
         self._letter_to_answer_idx = {'A': 0, 'B': 1, 'C': 2}
         self._answer_idx_to_letter = {0: 'A', 1: 'B', 2: 'C'}
 
-        self.split = 'dev'  # TFIDF, FastText. TODO: Once DREAM JSONs fixed, revert to auto-detecting split
+        # TODO: Once DREAM JSONs fixed, revert to auto-detecting split. Also remove use_bad_qid
         # for split in ['test', 'dev', 'train']:
         #     if split in self.datatype:
         #         self.split = split
         #         break
+        self.use_bad_qid = ('tfidf' in opt['evaluation_data_dir']) or ('fasttext' in opt['evaluation_data_dir'])
 
         datapath = os.path.join(
             opt['datapath'],
@@ -73,8 +74,10 @@ class IndexTeacher(FixedDialogTeacher):
                     options_text[option_no] = self._answer_idx_to_letter[option_no] + ': ' + options_text[option_no]
 
                 # Generate a Question ID by adding to diag_id
-                # qid = self.split + '/' + diag_id + '/' + str(idx)  # TFIDF, FastText
-                qid = diag_id + '-q' + str(idx)
+                if self.use_bad_qid:
+                    qid = 'dev/' + diag_id + '/' + str(idx)
+                else:
+                    qid = diag_id + '-q' + str(idx)
 
                 # Add example
                 self.examples.append({

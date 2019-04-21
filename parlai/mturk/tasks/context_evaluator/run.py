@@ -43,6 +43,8 @@ def main():
     opt.update(task_configs['sandbox' if opt['is_sandbox'] else 'live'])
     opt.update(task_configs[opt['prompt_type']])
     pprint(opt)
+    if opt['evaluation_data_dir'] is not None:
+        assert opt['dataset'] in opt['evaluation_data_dir'], 'Dataset name must be in evaluation data dir name.'
 
     # Load data to evaluate
     evaluation_data = None

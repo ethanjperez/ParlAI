@@ -58,6 +58,13 @@ class ContextEvaluationWorld(MTurkTaskWorld):
             'quotes and question': 'just a few quotes from the passage',
             'passage and question': 'the passage',
         }
+        self.accuracy_bonus_multiplier = {
+            'question': .5,
+            'quote and question': .5,
+            'question and quotes': 1.0,
+            'quotes and question': 1.0,
+            'passage and question': .5,
+        }[self.prompt_types[0]]
         self.accuracy_bonus_threshold = {
             'dream': {
                 'question': .5,
@@ -272,7 +279,7 @@ class ContextEvaluationWorld(MTurkTaskWorld):
                     for i, debate_mode in enumerate(self.possible_debate_modes):
                         evaluation_sample = self.evaluation_data[debate_mode][sample['qid']]
                         sentences_chosen = [evaluation_sample['sentences_chosen'][0]]  # NB: Always first sentence only
-                        sentences_chosen = self._format_sentences(sentences_chosen)
+                        self._format_sentences(sentences_chosen)
                         sentences_chosen = '\n'.join(sentences_chosen)
                         prompt_text += '\n'
                         prompt_text += '\nQuote: “' + sentences_chosen + '”'
@@ -290,19 +297,19 @@ class ContextEvaluationWorld(MTurkTaskWorld):
                     for i, debate_mode in enumerate(self.possible_debate_modes):
                         evaluation_sample = self.evaluation_data[debate_mode][sample['qid']]
                         sentences_chosen = [evaluation_sample['sentences_chosen'][0]]  # NB: Always first sentence only
-                        sentences_chosen_formatted = self._format_sentences(sentences_chosen)
-                        for sentence_chosen, sentence_chosen_formatted in zip(sentences_chosen, sentences_chosen_formatted):
+                        for sentence_chosen in sentences_chosen:
                             no_spaces_sentence_chosen = sentence_chosen.replace(' ', '')
                             if no_spaces_sentence_chosen in no_spaces_passage:
                                 passage_index = no_spaces_passage.index(no_spaces_sentence_chosen)
                             else:
                                 passage_index = float('inf')
-                                print('Couldn\'t find sentence:', sentence_chosen_formatted, '\nin passage:', sample['passage'])
-                            sentence_chosen_to_passage_index[sentence_chosen_formatted] = passage_index
-                    sorted_sentences_chosen = sorted(sentence_chosen_to_passage_index, key=sentence_chosen_to_passage_index.get)
+                                print('Couldn\'t find sentence:', sentence_chosen, '\nin passage:', sample['passage'])
+                            sentence_chosen_to_passage_index[self._format_sentences([sentence_chosen])[0]] = passage_index
+                    sorted_sentences_chosen = sorted(sentence_chosen_to_passage_index,
+                                                     key=sentence_chosen_to_passage_index.get)
                     sample['sentences_chosen'] = ' ... '.join(sorted_sentences_chosen)
 
-                    prompt_text = sample['sentences_chosen'] + '\n\n' + '\n'.join([sample['question'] + '\n'] + sample['options'])
+                    prompt_text = '“' + sample['sentences_chosen'] + '”\n\n' + '\n'.join([sample['question'] + '\n'] + sample['options'])
                     quotes_and_question_response = self.prompt_and_receive_response(
                         prompt_text, 'question and quotes', sample)
                     if quotes_and_question_response is None:
@@ -311,7 +318,7 @@ class ContextEvaluationWorld(MTurkTaskWorld):
                     # Get sentences chosen
                     evaluation_sample = self.evaluation_data[sample['debate_mode']][sample['qid']]
                     sentences_chosen = [evaluation_sample['sentences_chosen'][0]]  # NB: Always first agent only
-                    sentences_chosen = self._format_sentences(sentences_chosen)
+                    self._format_sentences(sentences_chosen)
 
                     # Format prompt
                     sentences_chosen = '\n'.join(sentences_chosen)
@@ -328,7 +335,8 @@ class ContextEvaluationWorld(MTurkTaskWorld):
                         self.num_debate_mode_responses += (quote_and_question_response ==
                                                            self.debate_mode_to_option[sample['debate_mode']])
                 elif prompt_type == 'passage and question':
-                    prompt_text = '\n' + '\n'.join(self._format_sentences(sample['text'].split('\n')))
+                    passage_text = sample['text'].split('\n')
+                    prompt_text = '\n' + '\n'.join(self._format_sentences(passage_text))
                     passage_and_question_response = self.prompt_and_receive_response(
                         prompt_text, 'passage and question', sample)
                     if passage_and_question_response is None:
@@ -367,25 +375,30 @@ class ContextEvaluationWorld(MTurkTaskWorld):
             # Evaluate work on non-qualifying questions
             if 'eval_labels' in sample:
                 is_correct = (response == sample['eval_labels'][0])
-                if is_correct:
-                    self.mturk_agent.observe({
-                        'episode_done': False,
-                        'id': 'System',
-                        'text': 'Correct!',
-                    })
-                else:
-                    answer_feedback_response, answer_feedback_duration = self.get_response_and_duration({
-                        'episode_done': False,
-                        'id': 'System',
-                        'text': 'The correct answer was ' + sample['eval_labels'][0] + '. Feel free to review the previous question and continue when you are ready.',
-                        'task_data': {'respond_with_form': [{
-                            'type': 'choices',
-                            'question': 'Ready to continue?',
-                            'choices': ['Yes']
-                        }]}
-                    })
-                    if answer_feedback_response is None:
-                        return
+                if prompt_type in {'question and quotes', 'quotes and question', 'passage and question'}:
+                    if is_correct:
+                        self.mturk_agent.observe({
+                            'episode_done': False,
+                            'id': 'System',
+                            'text': 'Correct!',
+                        })
+                    else:
+                        correct_answer_text = 'The correct answer was ' + sample['eval_labels'][0] + '.'
+                        if any(['quote' in prompt_type for prompt_type in self.prompt_types]):
+                            correct_answer_text += ' However, it may have been tough to know from our quotes.'
+                        correct_answer_text += ' Feel free to review the previous question and continue when you are ready.'
+                        answer_feedback_response, answer_feedback_duration = self.get_response_and_duration({
+                            'episode_done': False,
+                            'id': 'System',
+                            'text': correct_answer_text,
+                            'task_data': {'respond_with_form': [{
+                                'type': 'choices',
+                                'question': 'Ready to continue?',
+                                'choices': ['Yes']
+                            }]}
+                        })
+                        if answer_feedback_response is None:
+                            return
                 self.num_correct_on_labeled[prompt_type] = self.num_correct_on_labeled.get(prompt_type, 0)
                 self.num_correct_on_labeled[prompt_type] += is_correct
                 self.num_collected_on_labeled[prompt_type] = self.num_collected_on_labeled.get(prompt_type, 0)
@@ -498,7 +511,7 @@ class ContextEvaluationWorld(MTurkTaskWorld):
 
         if len(self.bonus_reasons) > 0:  # Meeting bonus condition overrides rejection/blocking
             self.mturk_agent.approve_work()
-            bonus_amount = round(.5 * self.reward, 2)
+            bonus_amount = round(self.accuracy_bonus_multiplier * self.reward, 2)
             self.mturk_agent.pay_bonus(bonus_amount, 'Great accuracy!')
             print(self.mturk_agent.worker_id, '| BONUS AWARDED')
         elif len(self.block_reasons) > 0:
@@ -535,7 +548,7 @@ class ContextEvaluationWorld(MTurkTaskWorld):
 
     def _format_sentences(self, sentence_list):
         """
-        Format and preprocess selected sentences before showing to workers.
+        Format and preprocess selected sentences before showing to workers. Modifies original sentence list.
         """
         for i in range(len(sentence_list)):
             if self.dataset == 'dream':
