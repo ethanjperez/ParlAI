@@ -20,7 +20,7 @@ task_configs = {
         'datatype': 'test.human_eval',
         'num_conversations': 100,
         'num_options': 4,
-        'unique_qual_name': 'race',
+        'unique_qual_name': 'race_raw/test.human_eval',
     },
     'dream': {
         'datatype': 'test.num_questions=100',
