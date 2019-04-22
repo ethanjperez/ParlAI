@@ -94,7 +94,7 @@ class ContextEvaluationWorld(MTurkTaskWorld):
                 'quote and question': 7000,
                 'question and quotes': 10000,
                 'quotes and question': 10000,
-                'passage and question': 20000,
+                'passage and question': 22000,
             },
         }[self.dataset]
         self.response_freq_reject_threshold = {

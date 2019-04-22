@@ -28,6 +28,9 @@ class IndexTeacher(FixedDialogTeacher):
         self._letter_to_answer_idx = {'A': 0, 'B': 1, 'C': 2, 'D': 3}
         self._answer_idx_to_letter = {0: 'A', 1: 'B', 2: 'C', 3: 'D'}
 
+        self.use_bad_qid = ('test' in opt['evaluation_data_dir']) and \
+                           (('tfidf' in opt['evaluation_data_dir']) or ('fasttext' in opt['evaluation_data_dir']))
+
         datapath = os.path.join(
             opt['datapath'],
             'RACE',
@@ -72,6 +75,8 @@ class IndexTeacher(FixedDialogTeacher):
                         options_text[option_no] = self._answer_idx_to_letter[option_no] + ': ' + options_text[option_no]
                     answer_index = self._letter_to_answer_idx[art_data["answers"][q]]
                     qid = self._filepath_to_id(art_file, q)
+                    if self.use_bad_qid:
+                        qid = qid.replace('test/', 'dev/')  # Add bug to QID to match files
                     self.examples.append({
                         'id': self.id,
                         'text': '\n'.join([passage_text + '\n', question_text + '\n'] + options_text),
@@ -82,7 +87,8 @@ class IndexTeacher(FixedDialogTeacher):
                         'qid': qid,
                         'passage': passage_text,
                         'question': question_text,
-                        'options': options_text
+                        'options': options_text,
+                        'question_type_labels': art_data['question_type_labels'][q],
                     })
         self.examples = self.examples[split_no::num_splits]
 

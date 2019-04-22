@@ -110,7 +110,7 @@ task_configs = {
         # 'evaluation_data_dir': '../allennlp/eval/race/race.ⅱ.m=sl-sents.i.lr=2e-5.bsz=12.n=1.x=0.5.c=concat/dev.num_passages=13',
         'evaluation_data_dir': '../allennlp/eval/dream/sl/test',
         'num_conversations': 25,
-        'reward': 1.5,  # RACE: 3.0, 22m, 1.5 bonus (or change reward/bonus). DREAM: 1.5, 11m, 1.5 bonus (vs. 2.0, 11m, 1.0, with lower bonus) (vs. 1.5, 11m, .75, with shorter qualifier)
+        'reward': 1.5,  # RACE: 2.0, 16m, 2.0 bonus. DREAM: 1.5, 11m, 1.5 bonus
         'assignment_duration_in_seconds': 5400,
         'hit_description': 'Can you answer passage comprehension questions using just a few quotes?',
         'task_description': """
@@ -148,10 +148,10 @@ task_configs = {
         """
     },
     'quotes and question': {
-        # 'evaluation_data_dir': '../allennlp/eval/race/race.ⅱ.m=sl-sents.i.lr=2e-5.bsz=12.n=1.x=0.5.c=concat/dev.num_passages=13',
-        'evaluation_data_dir': '../allennlp/eval/dream/fasttext.o/test',
+        # 'evaluation_data_dir': '../allennlp/eval/race/fasttext.o/test',
+        'evaluation_data_dir': '../allennlp/eval/dream/oracle.race.best/test',
         'num_conversations': 25,
-        'reward': 1.5,  # RACE: 3.0, 22m, 1.5 bonus (or change reward/bonus). DREAM: 1.5, 11m, 1.5 bonus (vs. 2.0, 11m, 1.0, with lower bonus) (vs. 1.5, 11m, .75, with shorter qualifier)
+        'reward': 1.5,  # RACE: 2.0, 16m, 2.0 bonus. DREAM: 1.5, 11m, 1.5 bonus (or 1.2/1.2)
         'assignment_duration_in_seconds': 5400,
         'hit_description': 'Can you answer passage comprehension questions using just a few quotes?',
         'task_description': """
@@ -186,7 +186,7 @@ task_configs = {
     'passage and question': {
         'evaluation_data_dir': None,
         'num_conversations': 25,
-        'reward': 3.17,  # DREAM: 1.5, 11m, 1.5, RACE: 3.0, 22m, 3.0?
+        'reward': 4.5,  # DREAM: 1.5, 11m, 1.5, RACE: 4.5, 23-34m, 4.5
         'assignment_duration_in_seconds': 5400,
         'hit_description': 'How well can you answer passage comprehension questions?',
         'task_description': """
@@ -194,8 +194,8 @@ task_configs = {
             You\'ll be paid double if you do well!<br><br>
             
             <b>Questions in HIT</b>: 20<br>
-            <b>Time</b>: 23 minutes<br>
-            <b>Bonus</b>: $3.17 for exceeding average worker accuracy<br>
+            <b>Time</b>: 23-34 minutes<br>
+            <b>Bonus</b>: $4.5 for exceeding average worker accuracy<br>
             <b>Payout</b>: Immediate<br>
             <b>Qualifying</b>: Must pass 4 trial questions first. We have the right to reject work for workers who pass the qualifier but provide spam on the real HIT.<br><br>
             
