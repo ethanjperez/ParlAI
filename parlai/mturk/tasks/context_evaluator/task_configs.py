@@ -148,7 +148,7 @@ task_configs = {
         """
     },
     'quotes and question': {
-        'evaluation_data_dir': '../allennlp/eval/race/fasttext.o/test',
+        'evaluation_data_dir': '../allennlp/eval/race/oracle.best/test',
         # 'evaluation_data_dir': '../allennlp/eval/dream/oracle.race.best/test',
         'num_conversations': 25,
         'reward': 2.0,  # RACE: 2.0, 16m, 2.0 bonus. DREAM: 1.5, 11m, 1.5 bonus (or 1.2/1.2)
