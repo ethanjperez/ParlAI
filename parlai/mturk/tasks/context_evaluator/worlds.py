@@ -292,13 +292,13 @@ class ContextEvaluationWorld(MTurkTaskWorld):
                     if question_and_quotes_response is None:
                         return
                 elif prompt_type == 'quotes and question':
-                    no_spaces_passage = sample['passage'].replace(' ', '')
+                    no_spaces_passage = sample['passage'].replace(' ', '').replace('\n', '')
                     sentence_chosen_to_passage_index = {}
                     for i, debate_mode in enumerate(self.possible_debate_modes):
                         evaluation_sample = self.evaluation_data[debate_mode][sample['qid']]
                         sentences_chosen = [evaluation_sample['sentences_chosen'][0]]  # NB: Always first sentence only
                         for sentence_chosen in sentences_chosen:
-                            no_spaces_sentence_chosen = sentence_chosen.replace(' ', '')
+                            no_spaces_sentence_chosen = sentence_chosen.replace(' ', '').replace('\n', '')
                             if no_spaces_sentence_chosen in no_spaces_passage:
                                 passage_index = no_spaces_passage.index(no_spaces_sentence_chosen)
                             else:
