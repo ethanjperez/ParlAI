@@ -33,7 +33,8 @@ class IndexTeacher(FixedDialogTeacher):
         #     if split in self.datatype:
         #         self.split = split
         #         break
-        self.use_bad_qid = ('tfidf' in opt['evaluation_data_dir']) or ('fasttext' in opt['evaluation_data_dir'])
+        self.use_bad_qid = ((opt['evaluation_data_dir'] is not None) and
+                            (('tfidf' in opt['evaluation_data_dir']) or ('fasttext' in opt['evaluation_data_dir'])))
 
         datapath = os.path.join(
             opt['datapath'],

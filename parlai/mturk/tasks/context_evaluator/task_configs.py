@@ -73,7 +73,7 @@ task_configs = {
         """
     },
     'quote and question': {
-        'evaluation_data_dir': '../allennlp/eval/race/tfidf.o/test',  # '../allennlp/eval/dream/oracle.pq2a/test'
+        'evaluation_data_dir': '../allennlp/eval/race/tfidf.o/test',  # '../allennlp/eval/dream/bi_ranker.last_epoch/test'
         'reward': 1.5,  # RACE: 1.5, 11m, .75 bonus. DREAM: 1.12, 8m, .56 bonus
         'assignment_duration_in_seconds': 2700,
         'hit_description': 'Can you answer passage comprehension questions using just a quote?',
@@ -148,8 +148,8 @@ task_configs = {
         """
     },
     'quotes and question': {
-        # 'evaluation_data_dir': '../allennlp/eval/race/oracle.best/test',
-        'evaluation_data_dir': '../allennlp/eval/dream/oracle/test',
+        # 'evaluation_data_dir': '../allennlp/eval/race/cross_ranker.best_epoch/test',
+        'evaluation_data_dir': '../allennlp/eval/dream/cross_ranker.last_epoch/test',
         'num_conversations': 25,
         'reward': 1.5,  # RACE: 2.0, 16m, 2.0 bonus. DREAM: 1.5, 11m, 1.5 bonus (or 1.2/1.2)
         'assignment_duration_in_seconds': 5400,
