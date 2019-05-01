@@ -151,7 +151,7 @@ task_configs = {
         # 'evaluation_data_dir': '../allennlp/eval/race/oracle.best/test',
         'evaluation_data_dir': '../allennlp/eval/dream/oracle/test',
         'num_conversations': 25,
-        'reward': 2.0,  # RACE: 2.0, 16m, 2.0 bonus (Expect almost all correct). DREAM: 1.5, 11m, 1.5 bonus (or 1.2/1.2)
+        'reward': 1.5,  # RACE: 2.0, 16m, 2.0 bonus. DREAM: 1.5, 11m, 1.5 bonus (or 1.2/1.2)
         'assignment_duration_in_seconds': 5400,
         'hit_description': 'Can you answer passage comprehension questions using just a few quotes?',
         'task_description': """
@@ -163,8 +163,8 @@ task_configs = {
             <font color="blue"><b>IMPORTANT</b></font>: Our setup inherently makes many questions challenging to answer. For these questions, just give your best guess! The task is meant to be fun.<br><br>
             
             <b>Questions in HIT</b>: 20<br>
-            <b>Time</b>: 16 minutes<br>
-            <b>Bonus</b>: $2 for exceeding average worker accuracy<br>
+            <b>Time</b>: 11 minutes<br>
+            <b>Bonus</b>: $1.5 for exceeding average worker accuracy<br>
             <b>Payout</b>: Immediate<br>
             <b>Qualifying</b>: Must pass 5 trial questions first. We have the right to reject work for workers who pass the qualifier but provide spam on the real HIT.<br><br>
             
