@@ -76,8 +76,8 @@ class ContextEvaluationWorld(MTurkTaskWorld):
             'race': {
                 'question': .47,
                 'quote and question': .55,
-                'question and quotes': .65,
-                'quotes and question': .7,
+                'question and quotes': .7,
+                'quotes and question': .75,
                 'passage and question': .9,
             },
         }[self.dataset]
