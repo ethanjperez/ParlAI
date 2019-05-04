@@ -148,7 +148,7 @@ task_configs = {
         """
     },
     'quotes and question': {
-        'evaluation_data_dir': '../allennlp/eval/race/race.m=sl-sents.i.best.e/test',
+        'evaluation_data_dir': '../allennlp/eval/race/race.m=sl-sents.best.e/test',
         # 'evaluation_data_dir': '../allennlp/eval/dream/sl-sents-influence/test',
         'num_conversations': 25,
         'reward': 2.0,  # RACE: 2.0, 16m, 2.0 bonus. DREAM: 1.5, 11m, 1.5 bonus (or 1.2/1.2)
