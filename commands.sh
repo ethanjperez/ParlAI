@@ -24,4 +24,4 @@ manager.approve_work('', override_rejection=True)
 manager.approve_assignments_for_hit('', override_rejection=True)
 
 # Copy remote -> local eval files
-rsync -rav -e ssh --include '*/' ejp416@access.cims.nyu.edu:~/research/ParlAI/parlai/mturk/core/run_data/live/ ~/research/ParlAI/parlai/mturk/core/run_data/live
+rsync -rav -e ssh --include '*/'ejp416@access.cims.nyu.edu:~/research/ParlAI/parlai/mturk/core/run_data/live/ ~/research/ParlAI/parlai/mturk/core/run_data/live
