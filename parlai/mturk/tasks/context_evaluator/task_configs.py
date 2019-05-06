@@ -73,7 +73,7 @@ task_configs = {
         """
     },
     'quote and question': {
-        'evaluation_data_dir': '../allennlp/eval/race/race.m=sl.best.e/test',  # '../allennlp/eval/race/cross_ranker.last_epoch/test'
+        'evaluation_data_dir': '../allennlp/eval/race/cross_ranker.last_epoch/test',  # '../allennlp/eval/race/cross_ranker.last_epoch/test'
         'reward': 1.5,  # RACE: 1.5, 11m, .75 bonus. DREAM: 1.12, 8m, .56 bonus
         'assignment_duration_in_seconds': 2700,
         'hit_description': 'Can you answer passage comprehension questions using just a quote?',
