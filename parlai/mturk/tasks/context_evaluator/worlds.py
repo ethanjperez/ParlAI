@@ -74,8 +74,8 @@ class ContextEvaluationWorld(MTurkTaskWorld):
                 'passage and question': .95,
             },
             'race': {
-                'question': .47,
-                'quote and question': .55,
+                'question': .55,
+                'quote and question': .6,
                 'question and quotes': .7,
                 'quotes and question': .75,
                 'passage and question': .9,
