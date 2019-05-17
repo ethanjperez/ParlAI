@@ -149,7 +149,7 @@ task_configs = {
         """
     },
     'quotes and question': {
-        'evaluation_data_dir': '../allennlp/eval/race/human.2/test',
+        'evaluation_data_dir': '../allennlp/eval/race/human.3/test',
         # 'evaluation_data_dir': '../allennlp/eval/dream/human/test',
         'num_conversations': 25,
         'reward': 3.1,  # RACE: 3.1, 21-33m, 3.1 bonus. DREAM: 1.5, 11m, 1.5 bonus
