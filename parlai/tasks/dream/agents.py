@@ -33,8 +33,12 @@ class IndexTeacher(FixedDialogTeacher):
         #     if split in self.datatype:
         #         self.split = split
         #         break
-        self.use_bad_qid = ((opt['evaluation_data_dir'] is not None) and
-                            (('tfidf' in opt['evaluation_data_dir']) or ('fasttext' in opt['evaluation_data_dir'])))
+        self.bad_qid_split = None
+        if opt['evaluation_data_dir'] is not None:
+            if ('tfidf.o' in opt['evaluation_data_dir']) or ('fasttext.o' in opt['evaluation_data_dir']):
+                self.bad_qid_split = 'dev'
+            elif ('tfidf' in opt['evaluation_data_dir']) or ('fasttext' in opt['evaluation_data_dir']) or ('first_n' in opt['evaluation_data_dir']):
+                self.bad_qid_split = 'test'
 
         datapath = os.path.join(
             opt['datapath'],
@@ -75,8 +79,8 @@ class IndexTeacher(FixedDialogTeacher):
                     options_text[option_no] = self._answer_idx_to_letter[option_no] + ': ' + options_text[option_no]
 
                 # Generate a Question ID by adding to diag_id
-                if self.use_bad_qid:
-                    qid = 'dev/' + diag_id + '/' + str(idx)
+                if self.bad_qid_split is not None:
+                    qid = self.bad_qid_split + '/' + diag_id + '/' + str(idx)
                 else:
                     qid = diag_id + '-q' + str(idx)
 

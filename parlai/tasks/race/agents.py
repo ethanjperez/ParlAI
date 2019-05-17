@@ -29,7 +29,7 @@ class IndexTeacher(FixedDialogTeacher):
         self._answer_idx_to_letter = {0: 'A', 1: 'B', 2: 'C', 3: 'D'}
 
         self.use_bad_qid = ((opt['evaluation_data_dir'] is not None) and ('test' in opt['evaluation_data_dir'])
-                            and ('fasttext' in opt['evaluation_data_dir']))
+                            and ('fasttext.o' in opt['evaluation_data_dir']))
 
         datapath = os.path.join(
             opt['datapath'],
