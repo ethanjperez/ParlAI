@@ -72,29 +72,25 @@ task_configs = {
             <b>Guesser</b>: D
         """
     },
-    'quote and question': {
-        # 'evaluation_data_dir': '../allennlp/eval/race/human.3/test',
-        'evaluation_data_dir': '../allennlp/eval/dream/human/test',
-        'reward': 1.12,  # RACE: 1.5, 11m, .75 bonus. DREAM: 1.12, 8m, .56 bonus
-        'assignment_duration_in_seconds': 2700,
-        'hit_description': 'Can you answer passage comprehension questions using just a quote?',
+    'passage and question': {
+        'evaluation_data_dir': None,
+        'num_conversations': 25,
+        'reward': 4.5,  # DREAM: 1.5, 11m, 1.5, RACE: 4.5, 23-34m, 4.5
+        'assignment_duration_in_seconds': 5400,
+        'hit_description': 'How well can you answer passage comprehension questions?',
         'task_description': """
-            <b>Your Goal</b>: See how well you can guess the answers to passage-comprehension exam questions, given just a quote from the passage.
-            You\'ll get a bonus if you do well!<br><br>
-            
-            <b>Our Goal</b>: We\'re trying to evaluate how important various passage sentences are for answering each question.<br><br>
-            
-            <font color="blue"><b>IMPORTANT</b></font>: Our setup inherently makes many questions nonsensical or impossible to answer. For these questions, just give your best guess! The task is meant to be fun.<br><br>
+            <b>Your Goal</b>: See how well you can answer reading comprehension exam, multiple-choice questions.
+            You\'ll be paid double if you do well!<br><br>
             
             <b>Questions in HIT</b>: 20<br>
-            <b>Time</b>: 8 minutes<br>
-            <b>Bonus</b>: $0.56 for exceeding average worker accuracy<br>
+            <b>Time</b>: 23-34 minutes<br>
+            <b>Bonus</b>: $4.5 for exceeding average worker accuracy<br>
             <b>Payout</b>: Immediate<br>
-            <b>Qualifying</b>: Must pass 3 trial questions first. We have the right to reject work for workers who pass the qualifier but provide spam on the real HIT.<br><br>
+            <b>Qualifying</b>: Must pass 4 trial questions first. We have the right to reject work for workers who pass the qualifier but provide spam on the real HIT.<br><br>
             
             <b>------------------- EXAMPLE -------------------</b> <br><br>
-            <b>Passage quote and question</b>:<br>
-            "Wearing Heelys for a long time could stop young people from developing their legs."<br><br>
+            <b>Passage and Question</b>:<br>
+            What's the coolest kind of transportation for middle school students back from winter holidays? A racing bike? A car? No, it's a special kind of shoes called Heelys. Heelys look just like common sports shoes, but they have a wheel hidden in the heel. So instead of walking, kids can \"fly\" around in them. \"Wearing Heelys is fun and cool! \" said Wu Peng, a boy who wore them on his first day back at No. 6 Middle School in Beijing. Wu Peng said he loves the shoes so much that he wears them to go here and there. Sometimes he even follows his parents' car to the supermarket in his Heelys! Other students also think they are very cool, but some aren't so lucky with their Heelys. It's said that some children fell down and got hurt while wearing these shoes. \"Heelys wheels are in the heels of the shoes, so it's easy to fall,\" said Liu Rui, a doctor at the Hong Kong International Medical Clinic, Beijing. Even worse, Liu said, \"Wearing Heelys for a long time could stop young people from developing their legs.\"<br><br>
             
             What does the doctor think of Heelys?<br><br>
             
@@ -103,7 +99,7 @@ task_configs = {
             C: They are bad for kids' health.<br>
             D: They are good for training.<br><br>
             
-            Which option is most likely correct?<br>
+            <b>Which option is most likely correct?</b><br>
             <b>Guesser</b>: C
         """
     },
@@ -148,9 +144,44 @@ task_configs = {
             <b>Guesser</b>: C
         """
     },
+    'quote and question': {
+        'evaluation_data_dir': '../allennlp/eval/race/cross_ranker.large.best_epoch/test',
+        # 'evaluation_data_dir': '../allennlp/eval/dream/human/test',
+        'reward': 1.5,  # RACE: 1.5, 11m, .75 bonus. DREAM: 1.12, 8m, .56 bonus
+        'assignment_duration_in_seconds': 2700,
+        'hit_description': 'Can you answer passage comprehension questions using just a quote?',
+        'task_description': """
+            <b>Your Goal</b>: See how well you can guess the answers to passage-comprehension exam questions, given just a quote from the passage.
+            You\'ll get a bonus if you do well!<br><br>
+            
+            <b>Our Goal</b>: We\'re trying to evaluate how important various passage sentences are for answering each question.<br><br>
+            
+            <font color="blue"><b>IMPORTANT</b></font>: Our setup inherently makes many questions nonsensical or impossible to answer. For these questions, just give your best guess! The task is meant to be fun.<br><br>
+            
+            <b>Questions in HIT</b>: 20<br>
+            <b>Time</b>: 11 minutes<br>
+            <b>Bonus</b>: $0.75 for exceeding average worker accuracy<br>
+            <b>Payout</b>: Immediate<br>
+            <b>Qualifying</b>: Must pass 3 trial questions first. We have the right to reject work for workers who pass the qualifier but provide spam on the real HIT.<br><br>
+            
+            <b>------------------- EXAMPLE -------------------</b> <br><br>
+            <b>Passage quote and question</b>:<br>
+            "Wearing Heelys for a long time could stop young people from developing their legs."<br><br>
+            
+            What does the doctor think of Heelys?<br><br>
+            
+            A: They are too expensive to buy.<br>
+            B: They are too fast to go.<br>
+            C: They are bad for kids' health.<br>
+            D: They are good for training.<br><br>
+            
+            Which option is most likely correct?<br>
+            <b>Guesser</b>: C
+        """
+    },
     'quotes and question': {
         # 'evaluation_data_dir': '../allennlp/eval/race/human.3/test',
-        'evaluation_data_dir': '../allennlp/eval/dream/fasttext.q/test',
+        'evaluation_data_dir': '../allennlp/eval/dream/cross_ranker.large.best_epoch/test',
         'num_conversations': 25,
         'reward': 1.5,  # RACE: 3.1, 21-33m, 3.1 bonus. DREAM: 1.5, 11m, 1.5 bonus
         'assignment_duration_in_seconds': 5400,
@@ -172,37 +203,6 @@ task_configs = {
             <b>------------------- EXAMPLE -------------------</b> <br><br>
             <b>Passage Quotes and Question</b>:<br>
             No, it's a special kind of shoes called Heelys. ... Sometimes he even follows his parents' car to the supermarket in his Heelys! ... It's said that some children fell down and got hurt while wearing these shoes. ... 'Wearing Heelys for a long time could stop young people from developing their legs.'<br><br>
-            
-            What does the doctor think of Heelys?<br><br>
-            
-            A: They are too expensive to buy.<br>
-            B: They are too fast to go.<br>
-            C: They are bad for kids' health.<br>
-            D: They are good for training.<br><br>
-            
-            <b>Which option is most likely correct?</b><br>
-            <b>Guesser</b>: C
-        """
-    },
-    'passage and question': {
-        'evaluation_data_dir': None,
-        'num_conversations': 25,
-        'reward': 4.5,  # DREAM: 1.5, 11m, 1.5, RACE: 4.5, 23-34m, 4.5
-        'assignment_duration_in_seconds': 5400,
-        'hit_description': 'How well can you answer passage comprehension questions?',
-        'task_description': """
-            <b>Your Goal</b>: See how well you can answer reading comprehension exam, multiple-choice questions.
-            You\'ll be paid double if you do well!<br><br>
-            
-            <b>Questions in HIT</b>: 20<br>
-            <b>Time</b>: 23-34 minutes<br>
-            <b>Bonus</b>: $4.5 for exceeding average worker accuracy<br>
-            <b>Payout</b>: Immediate<br>
-            <b>Qualifying</b>: Must pass 4 trial questions first. We have the right to reject work for workers who pass the qualifier but provide spam on the real HIT.<br><br>
-            
-            <b>------------------- EXAMPLE -------------------</b> <br><br>
-            <b>Passage and Question</b>:<br>
-            What's the coolest kind of transportation for middle school students back from winter holidays? A racing bike? A car? No, it's a special kind of shoes called Heelys. Heelys look just like common sports shoes, but they have a wheel hidden in the heel. So instead of walking, kids can \"fly\" around in them. \"Wearing Heelys is fun and cool! \" said Wu Peng, a boy who wore them on his first day back at No. 6 Middle School in Beijing. Wu Peng said he loves the shoes so much that he wears them to go here and there. Sometimes he even follows his parents' car to the supermarket in his Heelys! Other students also think they are very cool, but some aren't so lucky with their Heelys. It's said that some children fell down and got hurt while wearing these shoes. \"Heelys wheels are in the heels of the shoes, so it's easy to fall,\" said Liu Rui, a doctor at the Hong Kong International Medical Clinic, Beijing. Even worse, Liu said, \"Wearing Heelys for a long time could stop young people from developing their legs.\"<br><br>
             
             What does the doctor think of Heelys?<br><br>
             
