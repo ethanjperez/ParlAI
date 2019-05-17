@@ -5,8 +5,8 @@ srun --pty --mem=20000 -t 1-23:58 bash
 . ~/parlai.sh
 export PYTHONPATH='.'
 git pull
-python parlai/mturk/tasks/context_evaluator/run.py  --dataset race --prompt-type "quotes and question" --live
-python parlai/mturk/tasks/context_evaluator/run.py --dataset dream --prompt-type "quote and question" --live
+python parlai/mturk/tasks/context_evaluator/run.py --dataset dream --prompt-type "quotes and question" --live
+python parlai/mturk/tasks/context_evaluator/run.py --dataset race --prompt-type "quotes and question" --live
 
 # Delete HITs
 python parlai/mturk/core/scripts/delete_hits.py
