@@ -179,7 +179,7 @@ task_configs = {
     },
     'quotes and question': {
         # 'evaluation_data_dir': '../allennlp/eval/race/cross_ranker.large.best_epoch/test',
-        'evaluation_data_dir': '../allennlp/eval/race/tfidf.q/test',
+        'evaluation_data_dir': '../allennlp/eval/race/first_n/test',
         'num_conversations': 25,
         'reward': 3.1,  # RACE: 3.1, 21-33m, 3.1 bonus. DREAM: 1.5, 11m, 1.5 bonus
         'assignment_duration_in_seconds': 5400,
