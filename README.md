@@ -8,6 +8,10 @@ We made our own ParlAI task which contains all code specific to our evaluations 
 
 <table>
 <tr>
+    <td> <b> Python File </b> </td>
+    <td> <b> Functionality </b> </td>
+</tr>
+<tr>
     <td> <a href="https://github.com/ethanjperez/convince/tree/master/ParlAI/parlai/mturk/tasks/context_evaluator/run.py">run.py</a> </td>
     <td> Initialize, launch, and end HITs </td>
 </tr>
@@ -81,8 +85,8 @@ python parlai/mturk/tasks/context_evaluator/run.py \
 We support the following evidence evaluation setups (via arguments to `--prompt-type`):
 <table>
 <tr>
-    <td> --prompt-type </td>
-    <td> Evaluation Setup </td>
+    <td> <b> --prompt-type </b> </td>
+    <td> <b> Evaluation Setup </b> </td>
 </tr>
 <tr>
     <td> 'question' </td>
