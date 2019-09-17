@@ -29,6 +29,8 @@ We made our own ParlAI task which contains all code specific to our evaluations 
 </tr>
 </table>
 
+We also added data reading/processing code for RACE ([convince/ParlAI/parlai/tasks/race/](https://github.com/ethanjperez/convince/tree/master/ParlAI/parlai/tasks/race)) and DREAM ([convince/ParlAI/parlai/tasks/dream/](https://github.com/ethanjperez/convince/tree/master/ParlAI/parlai/tasks/dream))
+
 ## Installation
 
 #### Setting up a virtual environment
