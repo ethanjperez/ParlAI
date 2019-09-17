@@ -1,8 +1,9 @@
 # Human Evaluation
 This folder contains the code for evaluating the evidence selected by agents trained in [convince/allennlp](https://github.com/ethanjperez/convince/tree/master/allennlp).
+We used [ParlAI](https://parl.ai/) ([March 12, 2019 commit](https://github.com/ethanjperez/ParlAI/tree/baa839db2120c837562620386cbe1167bd0e9109)), making changes specific to our evaluation setup in a few files.
 
 ## Overview
-This repo reads the evidence selections from evaluation/inference log files of trained evidence agents (available [here](https://github.com/ethanjperez/convince/tree/master/allennlp/eval/mturk))
+This repo reads the evidence selections from evaluation/inference log files of trained evidence agents (available [here](https://github.com/ethanjperez/convince/tree/master/allennlp/eval/mturk)).
 We then run launch HITs (human evaluation jobs) on Amazon Mechanical Turk, using ParlAI's MTurk code ([convince/ParlAI/parlai/mturk](https://github.com/ethanjperez/convince/tree/master/ParlAI/parlai/mturk) - no GPU required).
 We made our own ParlAI task which contains all code specific to our evaluations ([convince/ParlAI/parlai/mturk/tasks/context_evaluator](https://github.com/ethanjperez/convince/tree/master/ParlAI/parlai/mturk/tasks/context_evaluator)) - we overview the files in this task-specific folder below:
 
